@@ -1,0 +1,109 @@
+@import '~antd/es/style/themes/default.less';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.colorWeak {
+  filter: invert(80%);
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+// 覆盖antd相关样式
+.ant-page-header-heading {
+  display: none !important;
+}
+
+.ant-pro-page-header-wrap-children-content {
+  margin: 12px 12px 0 !important;
+}
+
+.ant-pro-page-header-wrap-page-header-warp {
+  display: none !important;
+}
+
+.ant-pro-basicLayout-content .ant-pro-page-header-wrap {
+  margin-top: 24px !important;
+  padding-bottom: 40px;
+}
+
+.ant-layout-header {
+  position: fixed;
+  top: 0;
+  width: calc(100% - 256px);
+  transition: width 0.5s;
+}
+
+.ant-pro-basicLayout-content {
+  position: absolute;
+  top: 64px;
+  width: calc(100% - 48px);
+}
+
+.ant-layout-footer {
+  display: none;
+}
+
+.ant-table-pagination-right {
+  margin-right: 10px !important;
+}
+
+// 公共样式
+.sage-hidden {
+  display: none !important;
+}
+
+.sage-page-wrapper {
+  padding: 12px;
+}
+
+.sage-chart-card {
+  height: calc(100vh - 90px - 40px - 24px);
+  border: 1px solid #eee;
+}
+
+// 新增组件样式
+
+@media (max-width: @screen-xs) {
+  .ant-table {
+    width: 100%;
+    overflow-x: auto;
+    &-thead > tr,
+    &-tbody > tr {
+      > th,
+      > td {
+        white-space: pre;
+        > span {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+// 兼容IE11
+@media screen and(-ms-high-contrast: active), (-ms-high-contrast: none) {
+  body .ant-design-pro > .ant-layout {
+    min-height: 100vh;
+  }
+}

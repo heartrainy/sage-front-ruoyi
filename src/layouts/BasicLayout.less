@@ -1,0 +1,162 @@
+.sage-app-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.sage-sidebar-container {
+  transition: width .28s;
+  width: 205px !important;
+  background-color: #001529;
+  height: 100%;
+  position: fixed;
+  font-size: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.sage-main-container {
+  min-height: 100%;
+  transition: margin-left .28s;
+  margin-left: 205px;
+  position: relative;
+}
+
+.sidebar-logo-container {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  overflow: hidden;
+
+  a {
+    display: inline-block;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .sage-sidebar-logo-link {
+    height: 100%;
+    width: 100%;
+
+    .sage-sidebar-logo {
+      width: 32px;
+      height: 32px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .sage-sidebar-title {
+      display: inline-block;
+      margin: 0;
+      color: #fff;
+      font-weight: 600;
+      line-height: 50px;
+      font-size: 14px;
+      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+      vertical-align: middle;
+    }
+  }
+}
+
+.sidebar-scrollbar {
+  height: calc(100% - 50px);
+  .sidebar-scrollbar-wrapper {
+    height: 100%;
+    overflow: scroll;
+    overflow-x: hidden !important;
+    margin-right: -15px;
+  }
+}
+
+.sage-sider-menu {
+  height: calc(100% - 50px);
+  .sage-sider-menu-wrapper {
+    height: 100%;
+    overflow: scroll;
+    overflow-x: hidden !important;
+    margin-right: -15px;
+  }
+}
+
+.sage-fixed-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9;
+  width: calc(100% - 205px);
+  -webkit-transition: width .28s;
+  transition: width .28s;
+  padding: 0;
+}
+
+.sage-navbar {
+  height: 50px;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  -webkit-box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+
+  .sage-hamburger-container {
+    line-height: 50px;
+    height: 100%;
+    float: left;
+    cursor: pointer;
+    -webkit-transition: background .3s;
+    transition: background .3s;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background: rgba(0, 0, 0, .025);
+    }
+  }
+}
+
+.sage-app-main {
+  display: block;
+  padding-top: 90px;
+  width: 100%;
+  // min-height: calc(100vh - 90px);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.sage-dashboard-container {
+  height: calc(100vh - 90px - 40px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.hideSidebar {
+  .sage-sidebar-container {
+    width: 48px !important;
+  }
+
+  // 左侧导航栏菜单样式
+  .sage-sider-menu {
+    .ant-menu-item {
+      padding: 0 16px !important;
+    }
+    .ant-menu-submenu-title {
+      padding: 0 16px !important;
+    }
+  }
+
+  .sage-main-container {
+    margin-left: 48px;
+  }
+
+  .sage-fixed-header {
+    width: calc(100% - 48px);
+  }
+
+  .sage-sidebar-logo {
+    margin-right: 0 !important;
+  }
+}
