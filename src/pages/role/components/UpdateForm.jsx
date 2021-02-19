@@ -25,7 +25,13 @@ const UpdateForm = (props, ref) => {
       rules: [{ required: true }]
     },
     {
-      name: 'orderNum',
+      name: 'roleKey',
+      label: '权限字符',
+      type: 'input',
+      rules: [{ required: true }]
+    },
+    {
+      name: 'roleSort',
       label: '排序',
       type: 'input',
       rules: [{ required: true }]

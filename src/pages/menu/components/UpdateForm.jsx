@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
 import { poInteger } from '@/utils/verify'
+import { handleTree, selectDictLabel } from '@/utils/utils'
 import { queryMenu } from '../service'
 
 
@@ -9,20 +10,23 @@ const UpdateForm = (props, ref) => {
   const [menuType, setMenuType] = useState('0')
   const [parentIdOptions, setParentIdOptions] = useState([])
 
-  const { detail } = props
+  const { detail, visibleOptions, statusOptions } = props
 
   const formRef = useRef()
 
   // 初始化菜单下拉
   const requestMenuList = async () => {
     const res = await queryMenu()
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const data = res.data.slice()
+      console.log(data)
+      const tempData = handleTree(data, 'menuId')
+      console.log(tempData)
       const initData = [
         {
           value: 0,
           title: '主目录',
-          children: data
+          children: tempData
         }
       ]
       setParentIdOptions(initData)
@@ -55,7 +59,7 @@ const UpdateForm = (props, ref) => {
       name: 'parentId',
       label: '上级菜单',
       type: 'treeselect',
-      fieldNames: {title: 'menuName', value: 'id'},
+      fieldNames: {title: 'menuName', value: 'menuId'},
       props: {
         treeData: parentIdOptions
       }
@@ -65,9 +69,9 @@ const UpdateForm = (props, ref) => {
       label: '菜单类型',
       type: 'radio',
       options: [
-        { value: '0', text: '目录' },
-        { value: '1', text: '菜单' },
-        { value: '2', text: '按钮' }
+        { value: 'M', text: '目录' },
+        { value: 'C', text: '菜单' },
+        { value: 'F', text: '按钮' }
       ]
     },
     {
@@ -80,35 +84,8 @@ const UpdateForm = (props, ref) => {
       }
     },
     {
-      name: 'url',
-      label: menuType === '0' || menuType === '1' ? '路由地址' : '请求地址',
-      type: 'input',
-      props: {
-        placeholder: '请输入'
-      },
-    },
-    {
-      name: 'target',
-      label: '打开方式',
-      type: 'radio',
-      options: [
-        { value: '1', text: '页签' },
-        { value: '0', text: '新窗口' },
-      ],
-      isShow: menuType === '1'
-    },
-    {
-      name: 'perms',
-      label: '权限标识',
-      type: 'input',
-      props: {
-        placeholder: '请输入'
-      },
-      isShow: menuType === '1' || menuType === '2'
-    },
-    {
       name: 'orderNum',
-      label: '排序',
+      label: '显示排序',
       type: 'input',
       rules: [
         { required: true },
@@ -128,17 +105,53 @@ const UpdateForm = (props, ref) => {
       props: {
         placeholder: '请输入'
       },
-      isShow: menuType === '0' || menuType === '1'
+      isShow: menuType !== 'F'
+    },
+    {
+      name: 'isFrame',
+      label: '是否外链',
+      type: 'radio',
+      options: [
+        { value: '0', text: '是' },
+        { value: '1', text: '否' },
+      ],
+      isShow: menuType !== 'F'
+    },
+    {
+      name: 'path',
+      label: '路由地址',
+      type: 'input',
+      rules: [{ required: true }],
+      props: {
+        placeholder: '请输入'
+      },
+    },
+    {
+      name: 'perms',
+      label: '权限标识',
+      type: 'input',
+      props: {
+        placeholder: '请输入'
+      },
+      isShow: menuType !== 'M'
+    },
+    {
+      name: 'visible',
+      label: '显示状态',
+      type: 'radio',
+      options: visibleOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      isShow: menuType !== 'F'
     },
     {
       name: 'status',
-      label: '菜单可见',
+      label: '菜单状态',
       type: 'radio',
-      options: [
-        { value: '1', text: '显示' },
-        { value: '0', text: '隐藏' },
-      ],
-      isShow: menuType === '0' || menuType === '1'
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      isShow: menuType !== 'F'
     },
   ]
 

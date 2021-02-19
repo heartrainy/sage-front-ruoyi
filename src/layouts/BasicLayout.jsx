@@ -12,12 +12,11 @@ import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import TabBar from '@/components/TabBar';
 import GlobalFooter from '@/components/GlobalFooter';
-import { getAuthorityFromRouter } from '@/utils/utils';
+import { getAuthorityFromRouter, deepClone } from '@/utils/utils';
+import { getRouter } from '@/services/user';
 import logo from '../assets/logo.png';
 
 import './BasicLayout.less'
-
-const { REACT_APP_ENV } = process.env;
 
 const { SubMenu } = Menu;
 
@@ -78,6 +77,7 @@ const BasicLayout = (props) => {
       pathname: '/',
     },
     currentUser,
+    routers,
     route,
     collapsed,
     menuSelectedKeys,
@@ -113,72 +113,51 @@ const BasicLayout = (props) => {
   //   }
   // };
 
-  const authorized = getAuthorityFromRouter(props.route.routes, location.pathname || '/') || {
-    authority: undefined,
-  };
-  const { formatMessage } = useIntl();
+  // const authorized = getAuthorityFromRouter(props.route.routes, location.pathname || '/') || {
+  //   authority: undefined,
+  // };
+  // const { formatMessage } = useIntl();
 
-  // 处理菜单数据
-  const disposeMenu = (list, pname, pitem) => {
+  // 处理左侧菜单数据
+  const filterMenuTree = (list, parentPath) => {
+    list.forEach(item => {
+      if (parentPath && !item.path.includes('http')) {
+        item.path = parentPath + '/' + item.path
+      }
+      if (item.children) {
+        filterMenuTree(item.children, item.path)
+      }
+    })
+  }
 
-    if (REACT_APP_ENV === 'dev') {
-      list.forEach(item => {
-        const menuName = pname ? `${pname}.${item.name}` : `menu.${item.name}`
-        item.menuName = menuName
-        if (pname) {
-          item.parentPath = pitem.path
-        }
-        if (item.children) {
-          disposeMenu(item.children, menuName, item)
-        }
-      })
-    } else {
-      list.forEach(item => {
-        item.path = item.url
-        if (item.parentId !== 0) {
-          item.parentPath = pitem.path
-        }
-        if (item.children) {
-          if (item.children.length !== 0) {
-            disposeMenu(item.children, item.menuName, item)
-          } else {
-            delete item.children
-          }
-        }
-      })
-    }
+  // 获取左侧菜单
+  const getMenuTree = () => {
+    const list = deepClone(routers)
+    filterMenuTree(list)
 
+    // 添加固定路由
+    list.unshift({
+      hidden: false,
+      meta: {
+        icon: 'dashboard',
+        title: '首页'
+      },
+      name: 'Home',
+      path: '/home'
+    })
+    // console.log(list)
     return list
   }
 
-  // 获取菜单
-  const getMenuTree = () => {
-    const menuList = []
+  const menuTree = useMemo(() => getMenuTree(), [routers])
 
-    if (REACT_APP_ENV === 'dev') {
-      route.children.forEach(item => {
-        if (!item.redirect) {
-          menuList.push(item)
-        }
-      })
-    } else {
-      // const localMenuTree = JSON.parse(localStorage.menuTree)
-      const localMenuTree = currentUser.menuTree
-      localMenuTree.forEach(item => {
-        menuList.push(item)
-      })
-    }
-
-
-    return disposeMenu(menuList)
-  }
 
   // 递归显示菜单
   const getMenuChildren = (menuChildren) => {
     return menuChildren.map(item => {
       if (item.children) {
         return (
-          <SubMenu key={item.path} icon={<IconFont type={`icon-${item.icon}`} />} title={REACT_APP_ENV === 'dev' ? <FormattedMessage id={item.menuName} /> : item.menuName}>
+          <SubMenu key={item.path} icon={<IconFont type={`icon-${item.meta.icon}`} />} title={item.meta.title}>
             {
               getMenuChildren(item.children)
             }
@@ -186,10 +165,8 @@ const BasicLayout = (props) => {
         )
       }
       return (
-        <Menu.Item key={item.path} icon={<IconFont type={`icon-${item.icon}`} />}>
-          {
-            REACT_APP_ENV === 'dev' ? <FormattedMessage id={item.menuName} /> : item.menuName
-          }
+        <Menu.Item key={item.path} icon={<IconFont type={`icon-${item.meta.icon}`} />}>
+          {item.meta.title}
         </Menu.Item>
       )
     })
@@ -229,8 +206,6 @@ const BasicLayout = (props) => {
     // setOpenKeys(_openKeys.length > 1 ? [_openKeys.slice().pop()] : _openKeys)
   }
 
-  const menuTree = useMemo(() => getMenuTree(), [])
-
   // 判断菜单展开折叠
   const checkMenuOpen = (key) => {
     const loopMenuOpen = (list) => {
@@ -262,13 +237,17 @@ const BasicLayout = (props) => {
       currentPath = '/home'
     }
 
-    props.dispatch({
+    dispatch({
+      type: 'user/getRouters'
+    })
+
+    dispatch({
       type: 'global/updateState',
       payload: {
         menuSelectedKeys: [currentPath]
       }
     })
-    checkMenuOpen(currentPath)
+    // checkMenuOpen(currentPath)
 
   }, []);
   /**
@@ -333,7 +312,7 @@ const BasicLayout = (props) => {
           <TabBar
             // ref={tabBarRef}
             currentUser={currentUser}
-            menuTree={menuTree}
+            // menuTree={menuTree}
             // setSelectedKeys={setSelectedKeys}
             checkMenuOpen={checkMenuOpen}
           />
@@ -400,6 +379,7 @@ const BasicLayout = (props) => {
 };
 
 export default connect(({ user, global, settings }) => ({
+  routers: user.routers,
   currentUser: user.currentUser,
   collapsed: global.collapsed,
   menuSelectedKeys: global.menuSelectedKeys,

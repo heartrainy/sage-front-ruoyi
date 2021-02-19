@@ -1,9 +1,10 @@
-import { queryCurrent, query as queryUsers } from '@/services/user';
+import { queryCurrent, query as queryUsers, getRouters } from '@/services/user';
 
 const UserModel = {
   namespace: 'user',
   state: {
     currentUser: {},
+    routers: []
   },
   effects: {
     *fetch(_, { call, put }) {
@@ -16,11 +17,11 @@ const UserModel = {
 
     *fetchCurrent(_, { call, put }) {
       const response = yield call(queryCurrent);
-      if (response.isSuccess) {
-        const userInfo = response.data
+      if (response.code === 200) {
+        const userInfo = response.user
 
-        userInfo.name = userInfo.loginName || '创世者'
-        userInfo.avatar = userInfo.user.headImage ? `/ebd/sys/file/showImage?imageId=${userInfo.user.headImage}` : 'http://static.titian365.com/person_logo.png'
+        userInfo.name = userInfo.userName || '创世者'
+        userInfo.avatar = userInfo.avatar ? `/ebd/sys/file/showImage?imageId=${userInfo.user.headImage}` : 'http://static.titian365.com/person_logo.png'
 
         yield put({
           type: 'saveCurrentUser',
@@ -28,12 +29,25 @@ const UserModel = {
         });
       }
     },
+    *getRouters(_, { call, put }) {
+      const response = yield call(getRouters);
+      if (response.code === 200) {
+        const routers = response.data
+
+        yield put({
+          type: 'saveRouters',
+          payload: routers,
+        });
+      }
+    }
   },
   reducers: {
+    saveRouters(state, action ) {
+      return { ...state, routers: action.payload || []};
+    },
     saveCurrentUser(state, action) {
       return { ...state, currentUser: action.payload || {} };
     },
-
     changeNotifyCount(
       state = {
         currentUser: {},

@@ -161,7 +161,7 @@ const CrudList = () => {
     event.stopPropagation()
 
     const res = await removeCrud({ idArr: [record.id] })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }

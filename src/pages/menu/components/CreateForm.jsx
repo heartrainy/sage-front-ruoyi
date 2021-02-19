@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
 import { poInteger } from '@/utils/verify'
+import { handleTree, selectDictLabel } from '@/utils/utils'
 import { queryMenu } from '../service'
 
 const { Option } = Select
@@ -15,8 +16,9 @@ const CreateForm = (props, ref) => {
   // 初始化菜单下拉
   const requestMenuList = async () => {
     const res = await queryMenu()
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const data = res.data.slice()
+      console.log(data)
       const initData = [
         {
           value: '0',

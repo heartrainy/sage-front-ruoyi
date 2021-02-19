@@ -27,7 +27,7 @@ const UpdateForm = (props) => {
     const res = await getEnumDropDownList({
       code: 'DEVICE_CONTROL_TYPE,DEVICE_FUNCTION_TYPE'
     })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const { DEVICE_CONTROL_TYPE, DEVICE_FUNCTION_TYPE } = res.data
       DEVICE_CONTROL_TYPE && DEVICE_CONTROL_TYPE.forEach(item => {
         item.text = item.dictValue
@@ -46,7 +46,7 @@ const UpdateForm = (props) => {
     setLoading(true)
     const res = await getCrudDetail({ id: location.query.id })
     setLoading(false)
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const { data } = res
       setDetail(data)
       formRef.current.setFieldsValue({
@@ -134,7 +134,7 @@ const UpdateForm = (props) => {
     const res = await updateCrud(formData)
     setLoading(false)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       dropByCacheKey('/demo/tabcrud')
       onReturn()

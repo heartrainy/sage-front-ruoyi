@@ -60,9 +60,79 @@ export const getRouteAuthority = (path, routeData) => {
 
 
 /**
- *
+ * 延迟执行
  * @param {*} time 毫秒数
  */
 export const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+* 深度拷贝，适用于任何类型，针对于引用类型如数组，对象，函数（其实函数和数据也属于object，这里描述易于理解和区分）
+* PS:对象的简易克隆小技巧：var tmpObj = JSON.parse(JSON.stringify(传入对象)); 把应用类型序列化之后，变成了基本类型，基本类型不具有引用类型的地址引用特性，再把序列化猴的字符串反序列化为对象即可
+* @param {*} obj
+* @returns
+*/
+export const deepClone = (obj) => {
+   var o;
+   if (typeof obj == "object") {
+       if (obj === null) {
+           o = null;
+       } else {
+           if (obj instanceof Array) {
+               o = [];
+               for (var i = 0, len = obj.length; i < len; i++) {
+                   o.push(deepClone(obj[i]));
+               }
+           } else {
+               o = {};
+               for (var j in obj) {
+                   o[j] = deepClone(obj[j]);
+               }
+           }
+       }
+   } else {
+       o = obj;
+   }
+   return o;
+}
+
+/**
+ * 构造树型结构数据
+ * @param {*} data 数据源
+ * @param {*} id id字段 默认 'id'
+ * @param {*} parentId 父节点字段 默认 'parentId'
+ * @param {*} children 孩子节点字段 默认 'children'
+ * @param {*} rootId 根Id 默认 0
+ */
+export function handleTree(data, id, parentId, children, rootId) {
+	id = id || 'id'
+	parentId = parentId || 'parentId'
+	children = children || 'children'
+	rootId = rootId || Math.min.apply(Math, data.map(item => { return item[parentId] })) || 0
+	//对源数据深度克隆
+	const cloneData = JSON.parse(JSON.stringify(data))
+	//循环所有项
+	const treeData = cloneData.filter(father => {
+		let branchArr = cloneData.filter(child => {
+			//返回每一项的子级数组
+			return father[id] === child[parentId]
+		});
+		branchArr.length > 0 ? father.children = branchArr : '';
+		//返回第一层
+		return father[parentId] === rootId;
+	});
+	return treeData != '' ? treeData : data;
+}
+
+// 回显数据字典
+export function selectDictLabel(datas, value) {
+	var actions = [];
+	Object.keys(datas).some((key) => {
+		if (datas[key].dictValue == ('' + value)) {
+			actions.push(datas[key].dictLabel);
+			return true;
+		}
+	})
+	return actions.join('');
 }

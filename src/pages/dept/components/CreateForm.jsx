@@ -14,7 +14,7 @@ const CreateForm = (props, ref) => {
   // 初始化菜单下拉
   const requestDeptList = async () => {
     const res = await queryDept()
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const data = res.data.slice()
       setParentIdOptions(data)
     }

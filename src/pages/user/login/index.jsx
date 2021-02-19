@@ -1,11 +1,12 @@
-import { AlipayCircleOutlined, TaobaoCircleOutlined, WeiboCircleOutlined } from '@ant-design/icons';
-import { Alert, Checkbox } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { VerifiedOutlined } from '@ant-design/icons';
+import { Alert, Checkbox, Form, Row, Col, Input } from 'antd';
 import { Link, connect } from 'umi';
 import LoginFrom from './components/Login';
 import styles from './style.less';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginFrom;
+const FormItem = Form.Item;
 
 const LoginMessage = ({ content }) => (
   <Alert
@@ -20,15 +21,31 @@ const LoginMessage = ({ content }) => (
 
 const Login = props => {
   const { userLogin = {}, submitting } = props;
-  const { status, type: loginType, errorMessage } = userLogin;
+  const { status, type: loginType, errorMessage, codeUrl, uuid } = userLogin;
   const [autoLogin, setAutoLogin] = useState(true);
   const [type, setType] = useState('account');
 
-  const handleSubmit = values => {
+  const getCode = () => {
     const { dispatch } = props;
     dispatch({
+      type: 'login/getCodeImg',
+      payload: {},
+    });
+  }
+
+  useEffect(() => {
+    getCode()
+  }, [])
+
+  const handleSubmit = values => {
+    const { dispatch } = props;
+    const pp = {
+      uuid: uuid,
+      ...values
+    }
+    dispatch({
       type: 'login/login',
-      payload: { ...values, type },
+      payload: { ...pp }
     });
   };
 
@@ -60,6 +77,21 @@ const Login = props => {
               },
             ]}
           />
+          <FormItem shouldUpdate noStyle>
+            <Row gutter={8}>
+              <Col span={16}>
+                <FormItem 
+                  name="code"
+                  rules={[{ required: true, message: '请输入验证码!' }]}
+                >
+                  <Input size="large" placeholder="验证码" prefix={<VerifiedOutlined style={{ color: '#1890ff'}} />} />
+                </FormItem>
+              </Col>
+              <Col span={8}>
+                <img src={codeUrl} onClick={getCode} className="login-code-img"/>
+              </Col>
+            </Row>
+          </FormItem>
         </Tab>
         <Tab key="mobile" tab="手机号登录">
           {status === 'error' && loginType === 'mobile' && !submitting && (

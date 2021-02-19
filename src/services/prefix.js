@@ -1,1 +1,1 @@
-export const requestPrefix = 'ebd'
+export const requestPrefix = 'api'

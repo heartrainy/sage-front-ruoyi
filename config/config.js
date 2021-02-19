@@ -41,6 +41,10 @@ export default defineConfig({
       ],
     },
     {
+      path: '/sageformdesign',
+      component: '../components/SageFormDesign'
+    },
+    {
       path: '/404',
       component: './exception/404',
     },

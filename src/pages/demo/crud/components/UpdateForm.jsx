@@ -20,7 +20,7 @@ const UpdateForm = (props, ref) => {
     const res = await getEnumDropDownList({
       code: 'DEVICE_CONTROL_TYPE,DEVICE_FUNCTION_TYPE'
     })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const { DEVICE_CONTROL_TYPE = [], DEVICE_FUNCTION_TYPE = [] } = res.data
       DEVICE_CONTROL_TYPE && DEVICE_CONTROL_TYPE.forEach(item => {
         item.text = item.dictValue

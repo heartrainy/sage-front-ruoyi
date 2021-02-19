@@ -4,9 +4,10 @@ import { connect } from 'umi'
 import { SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/components/Common'
 import { createFromIconfontCN, PlusOutlined, EditOutlined, ReloadOutlined, SwapOutlined, DeleteOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { queryMenu, updateMenu, addMenu, removeMenu, getMenuDetail, clearMenu } from './service';
+import { getEnumDropDownList } from '@/services/enum'
 import CreateForm from './components/CreateForm'
 import UpdateForm from './components/UpdateForm'
-
+import { handleTree, selectDictLabel } from '@/utils/utils'
 
 
 // 详情数据
@@ -23,6 +24,8 @@ const MenuList = (props) => {
   const [removeable, setRemoveable] = useState(true)   // 删除按钮状态
   const [status, setStatus] = useState('') // 状态 1、add 2、update 3、detail
   const [modalLoading, setModalLoading] = useState(false) // 窗口loading
+  const [visibleOptions, setVisibleOptions] = useState([])
+  const [statusOptions, setStatusOptions] = useState([])
 
   // ref对象
   const tableRef = useRef();
@@ -34,8 +37,25 @@ const MenuList = (props) => {
     scriptUrl: settings.iconfontUrl,
   });
 
-  useEffect(() => {
+  // 是否可见Options
+  const requestVisibleOptions = async () => {
+    const res = await getEnumDropDownList({type: 'sys_show_hide'})
+    if (res.code === 200) {
+      setVisibleOptions(res.data)
+    }
+  }
 
+  // 状态Options
+  const requestStatusOptions = async () => {
+    const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+    if (res.code === 200) {
+      setStatusOptions(res.data)
+    }
+  }
+
+  useEffect(() => {
+    requestStatusOptions()
+    requestVisibleOptions()
   }, [])
 
   // 查询条件
@@ -93,7 +113,7 @@ const MenuList = (props) => {
     modalRef.current.setVisible(true)
 
     setStatus('update')
-    const res = await getMenuDetail({ id: record.id })
+    const res = await getMenuDetail({ menuId: record.menuId })
     const { data } = res
     setDetail(data)
 
@@ -101,11 +121,12 @@ const MenuList = (props) => {
       parentId: data.parentId,
       menuType: data.menuType,
       menuName: data.menuName,
-      url: data.url,
-      target: data.target,
+      path: data.path,
+      isFrame: data.isFrame,
       perms: data.perms,
       orderNum: data.orderNum,
       icon: data.icon,
+      visible: data.visible,
       status: data.status
     })
   }
@@ -115,7 +136,7 @@ const MenuList = (props) => {
     event.stopPropagation()
 
     const res = await removeMenu({ id: record.id })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -143,48 +164,28 @@ const MenuList = (props) => {
       render: text => text ? <IconFont type={`icon-${text}`} /> : ''
     },
     {
-      title: '路由地址',
-      dataIndex: 'url',
-      key: 'url',
-      width: 200,
-      render: (text, record) => record.menuType === '0' || record.menuType === '1' ? text : ''
+      title: '权限标识',
+      dataIndex: 'perms',
+      key: 'perms',
+      width: 200
     },
     {
-      title: '请求地址',
-      dataIndex: 'url',
-      key: 'url',
+      title: '组件路径',
+      dataIndex: 'component',
+      key: 'component',
       // width: 200,
-      render: (text, record) => record.menuType === '2' ? text : ''
     },
     {
-      title: '菜单类型',
-      dataIndex: 'menuType',
-      key: 'menuType',
-      width: 100,
-      render: text => {
-        let renderText = ''
-        switch (text) {
-          case '0':
-            renderText = '目录'
-            break;
-          case '1':
-            renderText = '菜单'
-            break;
-          case '2':
-            renderText = '按钮'
-            break;
-          default:
-            break;
-        }
-        return renderText
-      }
-    },
-    {
-      title: '可见',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: text => text === '1' ? '显示' : '隐藏'
+      render: text => selectDictLabel(statusOptions, text)
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
     },
     {
       title: '操作',
@@ -206,7 +207,9 @@ const MenuList = (props) => {
   ]
 
   const renderMenuData = data => {
-    const tempData = data.slice()
+    // 生成树结构
+    const tempData = handleTree(data, 'menuId')
+    // 去除空数组
     const removeChildren = list => {
       list.forEach(item => {
         if (item.children && item.children.length === 0) {
@@ -218,12 +221,13 @@ const MenuList = (props) => {
       })
     }
     removeChildren(tempData)
+    console.log(tempData)
 
     return tempData
   }
 
   const tableProps = {
-    rowKey: 'id',
+    rowKey: 'menuId',
     // hasCheck: true,
     columns,
     // scroll: { x: '100vw' },
@@ -264,7 +268,7 @@ const MenuList = (props) => {
 
     const rowRecords = tableRef.current.getSelectedRowKeys()
     const res = await removeMenu({ idArr: rowRecords })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -280,14 +284,6 @@ const MenuList = (props) => {
     }
   }
 
-  // 刷新缓存
-  const onRefreshMenu = async () => {
-    const res = await clearMenu()
-    if (res.isSuccess) {
-      SageMessage.success('菜单更新成功')
-    }
-  }
-
   // 表格按钮操作
   const tableToolProps = {
     toolBarRender: () => {
@@ -295,7 +291,7 @@ const MenuList = (props) => {
         <>
           <SageButton type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</SageButton>
           {/* <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={editable} style={{marginLeft: '8px'}}>编辑</SageButton> */}
-          <SageButton type="success" icon={<ReloadOutlined />} onClick={onRefreshMenu} style={{marginLeft: '8px'}}>刷新菜单缓存</SageButton>
+          {/* <SageButton type="success" icon={<ReloadOutlined />} onClick={onRefreshMenu} style={{marginLeft: '8px'}}>刷新菜单缓存</SageButton> */}
           <SageButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{marginLeft: '8px'}}>全部展开/折叠</SageButton>
         </>
       )
@@ -318,9 +314,9 @@ const MenuList = (props) => {
     const formData = Object.assign({}, values)
     // 处理赋值表单数据
     // TODO
-    if (formData.menuType === '2') {
-      formData.status = '1'
-    }
+    // if (formData.menuType === '2') {
+    //   formData.status = '1'
+    // }
 
     let res = null
     setModalLoading(true)
@@ -329,7 +325,7 @@ const MenuList = (props) => {
         res = await addMenu(formData)
         break;
       case 'update':
-        formData.id = detail.id
+        formData.menuId = detail.menuId
         res = await updateMenu(formData)
         break
       default:
@@ -337,7 +333,7 @@ const MenuList = (props) => {
     }
     setModalLoading(false)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       modalRef.current.setVisible(false)
       tableRef.current.reloadTable()
@@ -353,6 +349,7 @@ const MenuList = (props) => {
         {...tableToolProps}
         {...tableProps}
         request={(params) => queryMenu(params)}
+        dataParamName="data"
         renderData={data => renderMenuData(data)}
       />
 
@@ -368,6 +365,8 @@ const MenuList = (props) => {
           <CreateForm
             ref={createFormRef}
             onFinish={onFinish}
+            visibleOptions={visibleOptions}
+            statusOptions={statusOptions}
           /> : null
         }
         {
@@ -376,6 +375,8 @@ const MenuList = (props) => {
             ref={updateFormRef}
             detail={detail}
             onFinish={onFinish}
+            visibleOptions={visibleOptions}
+            statusOptions={statusOptions}
           /> : null
         }
       </SageModal>

@@ -5,8 +5,11 @@ export async function query() {
   return sageRequest('/api/users');
 }
 export async function queryCurrent() {
-  return sageRequest(`/${requestPrefix}/party/userInfo`);
+  return sageRequest(`/${requestPrefix}/getInfo`);
 }
 export async function queryNotices() {
   return sageRequest('/api/notices');
+}
+export async function getRouters() {
+  return sageRequest(`/${requestPrefix}/getRouters`);
 }

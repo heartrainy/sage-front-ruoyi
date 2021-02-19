@@ -109,7 +109,7 @@ const DeptList = () => {
     event.stopPropagation()
 
     const res = await removeDept({ id: record.id })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -123,7 +123,7 @@ const DeptList = () => {
       // content: 'Some descriptions',
       onOk: async () => {
         const res = await openOrClose({ id: record.id })
-        if (res.isSuccess) {
+        if (res.code === 200) {
           const tableData = tableRef.current.getDataSource()
           const loopChangeStatus = (list) => {
             for (let i = 0; i < list.length; i++) {
@@ -252,7 +252,7 @@ const DeptList = () => {
 
     const rowRecords = tableRef.current.getSelectedRowKeys()
     const res = await removeDept({ idArr: rowRecords })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -313,7 +313,7 @@ const DeptList = () => {
     }
     setModalLoading(false)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       modalRef.current.setVisible(false)
       tableRef.current.reloadTable()

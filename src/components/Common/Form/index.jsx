@@ -187,7 +187,7 @@ const SageForm = (props, ref) => {
             {
               item.options.map((item2, index2) => {
                 return (
-                  <FormComponent value={item2.value} key={item2.value}>{item2.text}</FormComponent>
+                  <FormComponent value={item2[valueName]} key={item2[valueName]}>{item2[textName]}</FormComponent>
                 )
               })
             }

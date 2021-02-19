@@ -58,10 +58,10 @@ const request = extend({
 request.interceptors.response.use(async (response) => {
   const data = await response.clone().json()
 
-  if (data && !data.isSuccess) {
+  if (data && data.code !== 200) {
       notification.destroy()
       notification.error({
-          message: data.message
+          message: data.msg
       })
   }
 
@@ -69,11 +69,14 @@ request.interceptors.response.use(async (response) => {
 })
 
 export default function sageRequest(url, options) {
-  request.extendOptions({
-    headers: {
-      Authorization: localStorage.systemToken || ''
-    }
-  })
+  // 如果有token则添加到header中
+  if (localStorage.token && localStorage.token !== 'undefined') {
+    request.extendOptions({
+      headers: {
+        Authorization: localStorage.token
+      }
+    })
+  }
 
   return request(url, options)
 };

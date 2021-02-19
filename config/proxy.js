@@ -7,13 +7,12 @@
  */
 export default {
   dev: {
-    '/ebd/': {
-      target: 'http://47.103.50.109:9051',
-      // target: 'http://47.103.50.109:9050',
-      // target: 'http://192.168.1.247:8040',
+    '/api/': {
+      target: 'http://47.103.50.109:8888',
+      // target: 'https://vue.ruoyi.vip/prod-api',
       changeOrigin: true,
       pathRewrite: {
-        '^/ebd': '',
+        '^/api': '',
       },
     },
   },

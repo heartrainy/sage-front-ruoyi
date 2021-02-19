@@ -3,7 +3,7 @@ import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
 import { mobile, email, idCode } from '@/utils/verify'
 import { queryDept } from '@/pages/dept/service'
-import { queryRule } from '@/pages/role/service'
+import { queryRole } from '@/pages/role/service'
 
 const CreateForm = (props, ref) => {
   const [orgnIdOptions, setOrgnIdOptions] = useState([])
@@ -14,7 +14,7 @@ const CreateForm = (props, ref) => {
   // 初始化菜单下拉
   const requestDeptList = async () => {
     const res = await queryDept()
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const data = res.data.slice()
       setOrgnIdOptions(data)
     }
@@ -22,8 +22,8 @@ const CreateForm = (props, ref) => {
 
   // 初始化角色数组
   const requestRoleList = async () => {
-    const res = await queryRule({pageNum: 1, pageSize: 100})
-    if (res.isSuccess) {
+    const res = await queryRole({pageNum: 1, pageSize: 100})
+    if (res.code === 200) {
       const data = res.data.slice()
       data.forEach(item => {
         item.label = item.roleName;

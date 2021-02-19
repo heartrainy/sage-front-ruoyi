@@ -18,7 +18,7 @@ const Center = (props) => {
   const formRef2 = useRef()
   // const requestCenterInfo = async () => {
   //   const res = await getUserDetail({id: props.user.currentUser.userId})
-  //   if (res.isSuccess) {
+  //   if (res.code === 200) {
   //     setUserDetail(res.data)
   //   }
   // }
@@ -76,7 +76,7 @@ const Center = (props) => {
     formData.loginId = userDetail.loginId
     const res = await updateUser(formData)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       window.location.reload()
     }
@@ -145,7 +145,7 @@ const Center = (props) => {
     // formData.loginId = userDetail.loginId
     const res = await modifyPwd(formData)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('修改密码成功')
       window.location.reload()
     }

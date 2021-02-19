@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-// import * as echarts from 'echarts';
+import { BarChart } from 'sage-chart'
 
 const Line = () => {
 
@@ -33,8 +33,8 @@ const Line = () => {
   // }, [])
 
   return (
-    <div class="sage-page-wrapper">
-      <div id="demo-bar-1" className="sage-chart-card"></div>
+    <div className="sage-page-wrapper">
+      <BarChart id="demo-bar-1" className="sage-chart-card" />
     </div>
 
   )

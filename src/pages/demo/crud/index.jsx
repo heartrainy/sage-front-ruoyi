@@ -32,7 +32,7 @@ const CrudList = () => {
     const res = await getEnumDropDownList({
       code: 'DEVICE_CONTROL_TYPE,DEVICE_FUNCTION_TYPE'
     })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       const { DEVICE_CONTROL_TYPE, DEVICE_FUNCTION_TYPE } = res.data
       DEVICE_CONTROL_TYPE && DEVICE_CONTROL_TYPE.forEach(item => {
         item.text = item.dictValue
@@ -198,7 +198,7 @@ const CrudList = () => {
     event.stopPropagation()
 
     const res = await removeCrud({ idArr: [record.id] })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -432,7 +432,7 @@ const CrudList = () => {
 
     const rowRecords = tableRef.current.getSelectedRowKeys()
     const res = await removeCrud({ idArr: rowRecords })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -510,7 +510,7 @@ const CrudList = () => {
     }
     setModalLoading(false)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       modalRef.current.setVisible(false)
       tableRef.current.reloadTable()

@@ -4,9 +4,12 @@ import { Card, Switch, Modal } from 'antd'
 import { SageLayoutLR, SageTable, SageModal, SageForm, SageButton, SageMessage, ActionSet } from '@/components/Common'
 import { MenuTree } from '@/components/Business'
 import { PlusOutlined, CheckOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { queryRule, updateRule, addRule, removeRule, getRuleDetail, openOrClose } from './service';
+import { queryRole, updateRole, addRole, removeRole, getRoleDetail, openOrClose, getMenuByRoleId } from './service';
+import { getEnumDropDownList } from '@/services/enum'
+import { deepClone } from '@/utils/utils'
 import CreateForm from './components/CreateForm'
 import UpdateForm from './components/UpdateForm'
+import { useEffect } from 'react'
 
 const { confirm } = Modal
 
@@ -21,6 +24,16 @@ const TableList = () => {
   const [status, setStatus] = useState('') // 状态 1、add 2、update 3、detail
   const [modalLoading, setModalLoading] = useState(false) // 窗口loading
   const [role, setRole] = useState({})   // 菜单分配对象
+  const [statusOptions, setStatusOptions] = useState([])  //  状态Options
+
+  // 获取状态下拉数据
+  const requestStatusOptions = async () => {
+    const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+  }
+
+  useEffect(() => {
+    requestStatusOptions()
+  }, [])
 
   // ref对象
   const tableRef = useRef();
@@ -67,16 +80,17 @@ const TableList = () => {
     event.stopPropagation()
 
     setStatus('update')
-    const res = await getRuleDetail({ id: record.id })
+    const res = await getRoleDetail({ roleId: record.roleId })
     const { data } = res
     setDetail(data)
 
     modalRef.current.setTitle('编辑角色')
     modalRef.current.setVisible(true)
     updateFormRef.current.setFieldsValue({
+      roleKey: data.roleKey,
       roleName: data.roleName,
-      orderNum: data.orderNum,
-      status: data.status === '1'
+      roleSort: data.roleSort,
+      status: data.status === '0'
     })
   }
 
@@ -84,42 +98,59 @@ const TableList = () => {
   const handleDelete = async (event, record) => {
     event.stopPropagation()
 
-    const res = await removeRule({ id: record.id })
-    if (res.isSuccess) {
+    const res = await removeRole({ roleId: record.roleId })
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
+  }
+
+  // 处理菜单数据
+  const filterMenuTree = (arr) => {
+
+    arr.forEach(item => {
+      item.title = item.label
+      item.key = item.id
+      if (item.children && item.children.length !== 0) {
+        item.children = item.children.slice()
+        filterMenuTree(item.children)
+      }
+    })
+
   }
 
   // 授权菜单
   const handleAuth = async (event, record) => {
     event.stopPropagation()
 
-    const res = await getRuleDetail({ id: record.id })
-    const { data: { id, authList } } = res
-
-    const checkedKeys = []
-    authList && authList.forEach(item => {
-      checkedKeys.push(item)
-    })
-
-    menutreeRef.current.setCheckedKeys(checkedKeys)
-    setRole({id})
+    const res = await getMenuByRoleId({ roleId: record.roleId })
+    if (res.code === 200) {
+      const { menus, checkedKeys } = res
+      filterMenuTree(menus)
+      menutreeRef.current.setMenuTree(menus)
+      menutreeRef.current.setCheckedKeys(checkedKeys)
+      setRole({
+        roleId: record.roleId,
+        menuIds: checkedKeys.slice()
+      })
+    }
   }
 
   // 不通过刷新列表请求修改列表状态
   const onChangeStatus = (checked, record) => {
+    console.log(checked)
+    console.log(record)
     confirm({
       title: `此操作将 "${checked ? '启用' : '停用'}" ${record.roleName}, 是否继续？`,
       icon: <ExclamationCircleOutlined />,
       // content: 'Some descriptions',
       onOk: async () => {
-        const res = await openOrClose({ id: record.id })
-        if (res.isSuccess) {
+        const res = await openOrClose({ roleId: record.roleId, status: checked ? '0' : '1' })
+        if (res.code === 200) {
           const tableData = tableRef.current.getDataSource()
           for (let i = 0; i < tableData.length; i++) {
-            if (tableData[i].id === record.id) {
-              tableData[i].status = checked ? '1' : '0'
+            if (tableData[i].roleId === record.roleId) {
+              tableData[i].status = checked ? '0' : '1'
               break;
             }
           }
@@ -139,24 +170,29 @@ const TableList = () => {
       title: '角色名',
       dataIndex: 'roleName',
       key: 'roleName',
-      width: 200,
-      ellipsis: true,
+      // width: 200,
+      // ellipsis: true,
+    },
+    {
+      title: '权限字符',
+      dataIndex: 'roleKey',
+      key: 'roleKey',
     },
     {
       title: '排序',
-      dataIndex: 'orderNum',
-      key: 'orderNum',
+      dataIndex: 'roleSort',
+      key: 'roleSort',
     },
     {
       title: '角色状态',
       dataIndex: 'status',
       key: 'status',
-      render: (text, record) => <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={text === '1'} onChange={(checked) => onChangeStatus(checked, record)} />
+      render: (text, record) => <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={text === '0'} onChange={(checked) => onChangeStatus(checked, record)} />
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      dataIndex: 'createTime',
+      key: 'createTime',
       width: 200
     },
     {
@@ -167,7 +203,7 @@ const TableList = () => {
       render: (button, record) => {
 
         const actionList = [
-          { title: '授权菜单', method: (e) => handleAuth(e, record) },
+          { title: '菜单权限', method: (e) => handleAuth(e, record) },
           { title: '编辑', method: (e) => handleEdit(e, record) },
           { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: '确认删除该角色?' },
         ]
@@ -179,7 +215,7 @@ const TableList = () => {
   ]
 
   const tableProps = {
-    rowKey: 'id',
+    rowKey: 'roleId',
     hasNumber: true,
     columns
   }
@@ -223,24 +259,24 @@ const TableList = () => {
     const formData = Object.assign({}, values)
     // 处理赋值表单数据
     // TODO
-    formData.status = formData.status ? '1' : '0'
+    formData.status = formData.status ? '0' : '1'
 
     let res = null
     setModalLoading(true)
     switch (status) {
       case 'add':
-        res = await addRule(formData)
+        res = await addRole(formData)
         break;
       case 'update':
-        formData.id = detail.id
-        res = await updateRule(formData)
+        formData.roleId = detail.roleId
+        res = await updateRole(formData)
         break
       default:
         break;
     }
     setModalLoading(false)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       modalRef.current.setVisible(false)
       tableRef.current.reloadTable()
@@ -251,16 +287,17 @@ const TableList = () => {
   const onSaveMenuRole = async () => {
     const checkedKeys = menutreeRef.current.getCheckedKeys()
     const halfCheckedKeys = menutreeRef.current.getHalfCheckedKeys()
-
+    console.log(checkedKeys)
+    console.log(halfCheckedKeys)
     const pp = {
-      ...role,
+      roleId: role.roleId,
       // authList: checkedKeys.checked   // 非关联
-      authList: checkedKeys.concat(halfCheckedKeys) // 关联
+      menuIds: checkedKeys.concat(halfCheckedKeys) // 关联
     }
 
-    const res = await updateRule(pp)
+    const res = await updateRole(pp)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
     }
   }
@@ -275,7 +312,7 @@ const TableList = () => {
             {...tableSearchFormProps}
             {...tableToolProps}
             {...tableProps}
-            request={(params) => queryRule(params)}
+            request={(params) => queryRole(params)}
           />
         }
         rightWidth={350}

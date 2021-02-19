@@ -1,6 +1,6 @@
 import { stringify } from 'querystring';
 import { history } from 'umi';
-import { fakeAccountLogin, fakeAccountLogout } from '@/services/login';
+import { fakeAccountLogin, fakeAccountLogout, getCodeImg } from '@/services/login';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 
@@ -8,12 +8,14 @@ const Model = {
   namespace: 'login',
   state: {
     status: undefined,
+    uuid: '',
+    codeUrl: ''
   },
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
 
-      if (response.isSuccess) {
+      if (response.code === 200) {
         yield put({
           type: 'changeLoginStatus',
           payload: {
@@ -25,7 +27,7 @@ const Model = {
         // 菜单赋值
         // localStorage.menuTree = JSON.stringify(response.data.menuTree)
         // 赋值token
-        localStorage.systemToken = response.data
+        localStorage.token = `Bearer ${response.token}`
 
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
@@ -53,7 +55,7 @@ const Model = {
           payload: {
             status: 'error',
             type: 'account',
-            errorMessage: response.message
+            errorMessage: response.msg
           },
         });
       }
@@ -62,11 +64,11 @@ const Model = {
     *logout({ payload }, { call }) {
       const response = yield call(fakeAccountLogout, payload);
 
-      if (response.isSuccess) {
+      if (response.code === 200) {
         const { redirect } = getPageQuery(); // Note: There may be security issues, please note
 
         // 取消token
-        localStorage.systemToken = ''
+        localStorage.token = ''
 
         if (window.location.pathname !== '/user/login' && !redirect) {
           history.replace({
@@ -78,6 +80,19 @@ const Model = {
         }
       }
     },
+    *getCodeImg({ payload }, { call, put }) {
+      const response = yield call(getCodeImg, payload);
+
+      if (response.code === 200) {
+        yield put({
+          type: 'changeLoginStatus',
+          payload: {
+            uuid: response.uuid,
+            codeUrl: "data:image/gif;base64," + response.img
+          },
+        });
+      }
+    }
   },
   reducers: {
     changeLoginStatus(state, { payload }) {

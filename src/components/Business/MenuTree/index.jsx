@@ -60,11 +60,12 @@ const MenuTree = (props, ref) => {
   }
 
   useEffect(() => {
-    getMenu()
+    // getMenu()
   }, [])
 
   // 暴露给外部的方法
   useImperativeHandle(ref, () => ({
+    setMenuTree: setTreeData,
     setCheckedKeys,
     getCheckedKeys,
     getHalfCheckedKeys,

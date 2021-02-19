@@ -13,7 +13,7 @@ const initState = {
     showQuickJumper: true,
     showTotal: (total) => `总共 ${total} 条记录`,
   },
-  searchParams: {},
+  searchParams: {}
 };
 
 /**
@@ -65,6 +65,7 @@ const SageTable = React.forwardRef((props, ref) => {
     dataSource: dataSourceProps,
     renderData = null,
     pagination: paginationProps,
+    dataParamName: dataParamNameProps = 'rows',
     loading: loadingProps,
     rowSelection: rowSelectionProps,
     onClickRow: onClickRowProps,
@@ -142,8 +143,9 @@ const SageTable = React.forwardRef((props, ref) => {
       const res = await request(queryParams);
       setLoading(false);
 
-      if (res.isSuccess) {
-        const { curPage: current, pageCount: pageSize, dataMaxCount: total } = res;
+      if (res.code === 200) {
+        //const { curPage: current, pageCount: pageSize, dataMaxCount: total } = res;
+        const { total } = res;
 
         const newSearchParams = Object.assign({}, queryParams);
         if (newSearchParams.pageNum) {
@@ -153,19 +155,19 @@ const SageTable = React.forwardRef((props, ref) => {
           delete newSearchParams.pageSize;
         }
 
-        let lastDataSource = res.data ? res.data.slice() : [];
+        let lastDataSource = res[dataParamNameProps] ? res[dataParamNameProps].slice() : [];
         if (renderData) {
           lastDataSource = renderData(lastDataSource);
         }
 
         setTableState({
-          pageNum: current,
-          pageSize,
+          pageNum: queryParams.pageNum,
+          pageSize: queryParams.pageSize,
           dataSource: lastDataSource,
           pagination: {
             ...tableState.pagination,
-            current,
-            pageSize,
+            current: queryParams.pageNum,
+            pageSize: queryParams.pageSize,
             total,
           },
           searchParams: hasSearchCondition ? { ...newSearchParams } : {},

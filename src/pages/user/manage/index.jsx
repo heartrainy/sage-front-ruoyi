@@ -101,7 +101,7 @@ const TableList = () => {
     event.stopPropagation()
 
     const res = await removeUser({ id: record.loginId })
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
@@ -115,7 +115,7 @@ const TableList = () => {
       // content: 'Some descriptions',
       onOk: async () => {
         const res = await openOrClose({ loginId: record.loginId })
-        if (res.isSuccess) {
+        if (res.code === 200) {
           const tableData = tableRef.current.getDataSource()
           for (let i = 0; i < tableData.length; i++) {
             if (tableData[i].loginId === record.loginId) {
@@ -248,7 +248,7 @@ const TableList = () => {
     }
     setModalLoading(false)
 
-    if (res.isSuccess) {
+    if (res.code === 200) {
       SageMessage.success('保存成功')
       modalRef.current.setVisible(false)
       tableRef.current.reloadTable()

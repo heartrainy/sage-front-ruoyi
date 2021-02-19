@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-// import * as echarts from 'echarts';
+import { PieChart } from 'sage-chart'
 
 const Pie = () => {
 
@@ -51,8 +51,8 @@ const Pie = () => {
   }, [])
 
   return (
-    <div class="sage-page-wrapper">
-      <div id="demo-pie-1" className="sage-chart-card"></div>
+    <div className="sage-page-wrapper">
+      <PieChart id="demo-pie-1" className="sage-chart-card" />
     </div>
 
   )
