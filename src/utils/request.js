@@ -89,7 +89,6 @@ request.interceptors.request.use((url, options) => {
 
 request.interceptors.response.use(async (response, options) => {
 
-  console.log(options)
   const data = await response.clone().json()
 
   if (data && data.code !== 200) {

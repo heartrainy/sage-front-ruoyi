@@ -1,18 +1,5 @@
 import React, { useEffect, useState, useImperativeHandle } from 'react'
 import { SageTree } from '@/components/Common'
-import { queryMenu } from '@/pages/menu/service'
-
-// 遍历所有子节点数组改变结构
-function loopTree(arr) {
-  arr.forEach(item => {
-    item.title = item.menuName
-    item.key = item.id
-    if (item.hasSun) {
-      item.children = item.children.slice()
-      loopTree(item.children)
-    }
-  })
-}
 
 const MenuTree = (props, ref) => {
 
@@ -23,14 +10,6 @@ const MenuTree = (props, ref) => {
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const [checkStrictly, setCheckStrictly] = useState(true)
-
-  const getMenu = async () => {
-    const res = await queryMenu()
-    const { data } = res
-    const treeDataArr = data ? data.slice() : []
-    loopTree(treeDataArr)
-    setTreeData(treeDataArr)
-  }
 
   const onExpand = expandedkeys => {
     // console.log('onExpand', expandedkeys); // if not set autoExpandParent to false, if children expanded, parent can not collapse.
@@ -60,7 +39,7 @@ const MenuTree = (props, ref) => {
   }
 
   useEffect(() => {
-    // getMenu()
+
   }, [])
 
   // 暴露给外部的方法

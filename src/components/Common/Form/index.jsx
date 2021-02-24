@@ -224,10 +224,8 @@ const SageForm = (props, ref) => {
             })
           }
           loopCheckTreeData(treeData)
-          console.log(treeData)
           formCompnentNode = <FormComponent {...otherProps} treeData={treeData} />
         } else {
-          console.log(1)
           formCompnentNode = <FormComponent {...item.props} />
         }
         break;

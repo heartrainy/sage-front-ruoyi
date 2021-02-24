@@ -10,8 +10,8 @@ function loopTree(arr) {
   arr.forEach(item => {
     item.title = item.label
     item.key = item.id
+    item.value = item.id
     if (item.children && item.children.length !== 0) {
-      item.children = item.children.slice()
       loopTree(item.children)
     }
   })
@@ -68,7 +68,7 @@ const UpdateForm = (props, ref) => {
       // fieldNames: { title: 'orgnName', value: 'id' },
       props: {
         treeData: deptTree
-      },
+      }
     },
     {
       name: 'phonenumber',
