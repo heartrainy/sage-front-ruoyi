@@ -53,7 +53,7 @@ export function getPostsAndRoles() {
   });
 }
 
-// 导出角色
+// 导出用户
 export async function exportUser(params) {
   return request(`/${requestPrefix}/system/user/export`, {
     method: 'GET',
@@ -61,17 +61,20 @@ export async function exportUser(params) {
   })
 }
 
-// 导入角色
+// 导入用户
 export async function importUser(params) {
   return request(`/${requestPrefix}/system/user/importData?updateSupport=${params.updateSupport}`, {
     method: 'POST',
-    data: params.file
+    data: params.file,
+    params: {
+      hideError: true
+    }
   })
 }
 
-// 导入角色
+// 下载模板
 export async function uploadTemplate() {
-  return request(`/${requestPrefix}//system/user/importTemplate`, {
+  return request(`/${requestPrefix}/system/user/importTemplate`, {
     method: 'GET'
   })
 }

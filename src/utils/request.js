@@ -87,14 +87,18 @@ request.interceptors.request.use((url, options) => {
   };
 });
 
-request.interceptors.response.use(async (response) => {
+request.interceptors.response.use(async (response, options) => {
+
+  console.log(options)
   const data = await response.clone().json()
 
   if (data && data.code !== 200) {
+    if (!options.params.hideError) {
       notification.destroy()
       notification.error({
           message: data.msg
       })
+    }
   }
 
   return response
