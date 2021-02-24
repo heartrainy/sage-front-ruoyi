@@ -140,7 +140,7 @@ const TableList = () => {
     modalRef.current.setVisible(true)
     updateFormRef.current.setFieldsValue({
       nickName: data.nickName,
-      userName: data.userName,
+      // userName: data.userName,
       sex: data.sex,
       deptId: data.deptId,
       phonenumber: data.phonenumber,
@@ -341,6 +341,11 @@ const TableList = () => {
     importModalRef.current.setVisible(true)
   }
 
+  // 导入成功回调
+  const importSuccess = () => {
+    tableRef.current.reloadTable()
+  }
+
   // 导出
   const onExport = async (e) => {
     e.stopPropagation()
@@ -402,6 +407,7 @@ const TableList = () => {
         break;
       case 'update':
         formData.userId = detail.userId
+        formData.userName = detail.userName
         res = await updateUser(formData)
         break
       default:
@@ -490,6 +496,7 @@ const TableList = () => {
 
       <ImportModal 
         ref={importModalRef}
+        importSuccess={importSuccess}
         request={(params) => importUser(params)}
         downloadTemplate={uploadTemplate}
       />

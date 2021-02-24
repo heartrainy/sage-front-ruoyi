@@ -68,6 +68,10 @@ function ImportModal(props, ref) {
         width: '460px',
         content: <div dangerouslySetInnerHTML={{__html: res.msg}} />
       })
+
+      if (props.importSuccess && typeof props.importSuccess === 'function') {
+        props.importSuccess()
+      }
     } else {
       Modal.error({
         title: '导入结果',

@@ -361,7 +361,8 @@ const TableList = () => {
       roleKey: role.roleKey,
       roleName: role.roleName,
       // authList: checkedKeys.checked   // 非关联
-      menuIds: checkedKeys.concat(halfCheckedKeys) // 关联
+      menuIds: checkedKeys.concat(halfCheckedKeys), // 关联
+      menuCheckStrictly: true       // 默认父子关联
     }
 
     const res = await updateRole(pp)

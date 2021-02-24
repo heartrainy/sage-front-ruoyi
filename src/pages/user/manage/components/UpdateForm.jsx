@@ -91,30 +91,30 @@ const UpdateForm = (props, ref) => {
         { pattern: email, message: '请输入正确的邮箱' }
       ]
     },
-    {
-      name: 'userName',
-      label: '用户名',
-      type: 'input',
-      rules: [
-        { required: true }
-      ],
-      props: {
-        placeholder: '请输入用户名'
-      }
-    },
-    {
-      name: 'password',
-      label: '用户密码',
-      type: 'input',
-      rules: [
-        { required: true }
-      ],
-      initialValue: '123456',
-      props: {
-        type: 'password',
-        placeholder: '请输入用户密码'
-      }
-    },
+    // {
+    //   name: 'userName',
+    //   label: '用户名',
+    //   type: 'input',
+    //   rules: [
+    //     { required: true }
+    //   ],
+    //   props: {
+    //     placeholder: '请输入用户名'
+    //   }
+    // },
+    // {
+    //   name: 'password',
+    //   label: '用户密码',
+    //   type: 'input',
+    //   rules: [
+    //     { required: true }
+    //   ],
+    //   initialValue: '123456',
+    //   props: {
+    //     type: 'password',
+    //     placeholder: '请输入用户密码'
+    //   }
+    // },
     {
       name: 'sex',
       label: '性别',
