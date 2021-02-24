@@ -9,8 +9,8 @@ export async function fakeAccountLogin(params) {
 }
 
 export async function fakeAccountLogout() {
-  return request(`/${requestPrefix}/party/logout`, {
-    method: 'GET',
+  return request(`/${requestPrefix}/logout`, {
+    method: 'POST',
   });
 }
 

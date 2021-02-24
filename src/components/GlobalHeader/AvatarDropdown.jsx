@@ -15,7 +15,7 @@ class AvatarDropdown extends React.Component {
       confirm({
         title: '退出登录',
         icon: <ExclamationCircleOutlined />,
-        content: '您确认要退出吗？',
+        content: '确定注销并退出系统吗？',
         okText: '确认',
         cancelText: '取消',
         onOk() {

@@ -351,7 +351,6 @@ const TableList = () => {
       content: '是否确认导出所有用户数据项?',
       onOk: async () => {
         const exportParams = tableRef.current.getSearchParamsValue()
-        console.log(exportParams)
         const res = await exportUser(exportParams)
         if (res.code === 200) {
           download(res.msg)

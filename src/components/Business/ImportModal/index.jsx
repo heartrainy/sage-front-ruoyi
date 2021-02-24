@@ -7,6 +7,11 @@ import { SageMessage } from '@/components/Common';
 
 const { Dragger } = Upload;
 
+/**
+ * 导出窗口
+ * @param {*} props 
+ * @param {*} ref 
+ */
 function ImportModal(props, ref) {
 
   const { width = '400px', title = '导入', request, downloadTemplate } = props
