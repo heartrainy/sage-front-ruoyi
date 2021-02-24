@@ -71,8 +71,6 @@ function ImportModal(props, ref) {
       })
     }
 
-    
-
     setVisible(false)
   }
 
