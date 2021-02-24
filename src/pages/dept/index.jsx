@@ -5,9 +5,10 @@ import { SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/comp
 import { PlusOutlined, EditOutlined, SwapOutlined, ExclamationCircleOutlined, DeleteOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { getEnumDropDownList } from '@/services/enum'
-import { queryDept, updateDept, addDept, removeDept, getDeptDetail, openOrClose } from './service';
+import { queryDept, updateDept, addDept, removeDept, getDeptDetail, queryDeptExclude, openOrClose } from './service';
 import CreateForm from './components/CreateForm'
 import UpdateForm from './components/UpdateForm'
+import { handleTree, selectDictLabel } from '@/utils/utils'
 
 const { confirm } = Modal
 
@@ -24,6 +25,10 @@ const DeptList = () => {
   const [removeable, setRemoveable] = useState(true)   // 删除按钮状态
   const [status, setStatus] = useState('') // 状态 1、add 2、update 3、detail
   const [modalLoading, setModalLoading] = useState(false) // 窗口loading
+  const [statusOptions, setStatusOptions] = useState([])
+  const [parentIdOptions, setParentIdOptions] = useState([])
+  const [deptList, setDeptList] = useState([])
+  const [parentId, setParentId] = useState('')
 
   // ref对象
   const tableRef = useRef();
@@ -31,32 +36,41 @@ const DeptList = () => {
   const createFormRef = useRef();
   const updateFormRef = useRef();
 
-  useEffect(() => {
+  // 状态Options
+  const requestStatusOptions = async () => {
+    const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+    if (res.code === 200) {
+      setStatusOptions(res.data)
+    }
+  }
 
+  useEffect(() => {
+    requestStatusOptions()
   }, [])
 
   // 查询条件
   const searchFields = [
-    // {
-    //   name: 'menuName',
-    //   label: '菜单名称',
-    //   type: 'input',
-    //   props: {
-    //     placeholder: '请输入'
-    //   }
-    // },
-    // {
-    //   name: 'status',
-    //   label: '菜单状态',
-    //   type: 'select',
-    //   options: [
-    //     {text: '显示', value: '1'},
-    //     {text: '隐藏', value: '0'}
-    //   ],
-    //   props: {
-    //     allowClear: true
-    //   }
-    // },
+    {
+      name: 'deptName',
+      label: '部门名称',
+      type: 'input',
+      props: {
+        placeholder: '请输入部门名称',
+        allowClear: true
+      }
+    },
+    {
+      name: 'status',
+      label: '状态',
+      type: 'select',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      props: {
+        placeholder: '部门状态',
+        allowClear: true
+      }
+    }
   ]
 
   // 查询
@@ -82,33 +96,50 @@ const DeptList = () => {
     onResetTable
   }
 
+  // 新增
+  const handleAdd = (event, record) => {
+    event.stopPropagation()
+    
+    onAdd(record.deptId)
+  }
+
   // 编辑
   const handleEdit = async (event, record) => {
     event.stopPropagation()
 
-    setStatus('update')
-    const res = await getDeptDetail({ id: record.id })
-    const { data } = res
-    setDetail(data)
-
     modalRef.current.setTitle('编辑')
     modalRef.current.setVisible(true)
-    updateFormRef.current.setFieldsValue({
-      fatherOrgnId: data.fatherOrgnId,
-      orgnName: data.orgnName,
-      orderNum: data.orderNum,
-      leader: data.leader,
-      phone: data.phone,
-      email: data.email,
-      status: data.status === '1'
-    })
+
+    setStatus('update')
+    const res2 = await queryDeptExclude({ deptId: record.deptId })
+    if (res2.code === 200) {
+      const data = handleTree(res2.data, 'deptId')
+      setParentIdOptions(data)
+    }
+
+    const res = await getDeptDetail({ deptId: record.deptId })
+    if (res.code === 200) {
+      const { data } = res
+      setDetail(data)
+  
+      updateFormRef.current.setFieldsValue({
+        parentId: data.parentId,
+        deptName: data.deptName,
+        orderNum: data.orderNum,
+        leader: data.leader,
+        phone: data.phone,
+        email: data.email,
+        status: data.status
+      })
+    }
+    
   }
 
   // 删除
   const handleDelete = async (event, record) => {
     event.stopPropagation()
 
-    const res = await removeDept({ id: record.id })
+    const res = await removeDept({ deptId: record.deptId })
     if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
@@ -118,7 +149,7 @@ const DeptList = () => {
   // 不通过刷新列表请求修改列表状态
   const onChangeStatus = (checked, record) => {
     confirm({
-      title: `此操作将 "${checked ? '启用' : '停用'}" ${record.orgnName}, 是否继续？`,
+      title: `此操作将 "${checked ? '启用' : '停用'}" ${record.deptName}, 是否继续？`,
       icon: <ExclamationCircleOutlined />,
       // content: 'Some descriptions',
       onOk: async () => {
@@ -151,9 +182,9 @@ const DeptList = () => {
   const columns = [
     {
       title: '部门名称',
-      dataIndex: 'orgnName',
-      key: 'orgnName',
-      width: 200,
+      dataIndex: 'deptName',
+      key: 'deptName',
+      width: 250,
     },
     {
       title: '排序',
@@ -165,13 +196,13 @@ const DeptList = () => {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (text, record) => <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={text === '1'} onChange={(checked) => onChangeStatus(checked, record)} />
+      render: text => selectDictLabel(statusOptions, text)
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: 200
+      dataIndex: 'createTime',
+      key: 'createTime',
+      // width: 200
     },
     {
       title: '操作',
@@ -183,17 +214,23 @@ const DeptList = () => {
 
         const actionList = [
           { title: '编辑', method: (e) => handleEdit(e, record) },
-          { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: '确认删除该菜单?' },
+          { title: '新增', method: (e) => handleAdd(e, record) }
         ]
 
-        return record.fatherOrgnId !== 0 ? <ActionSet actionList={actionList} record={record} /> : null
+        if (record.parentId !== 0) {
+          actionList.push({ title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除名称为"${record.deptName}"的数据项?` })
+        }
+
+        return <ActionSet actionList={actionList} record={record} />
       },
-      width: 120
+      // width: 120
     }
   ]
 
   const renderDeptData = data => {
-    const tempData = data.slice()
+    // 生成树结构
+    const tempData = handleTree(data, 'deptId')
+    // 去除空数组
     const removeChildren = list => {
       list.forEach(item => {
         if (item.children && item.children.length === 0) {
@@ -205,12 +242,13 @@ const DeptList = () => {
       })
     }
     removeChildren(tempData)
+    setDeptList(tempData)
 
     return tempData
   }
 
   const tableProps = {
-    rowKey: 'id',
+    rowKey: 'deptId',
     // hasCheck: true,
     columns,
     // scroll: { x: '100vw' },
@@ -229,14 +267,17 @@ const DeptList = () => {
   }
 
   // 新建按钮
-  const onAdd = () => {
+  const onAdd = (deptId) => {
+    if (deptId) {
+      setParentId(deptId)
+    } else {
+      setParentId('')
+    }
+
     if (modalRef.current) {
       setStatus('add')
       modalRef.current.setTitle('新增')
       modalRef.current.setVisible(true)
-      if (createFormRef.current) {
-        createFormRef.current.resetFields()
-      }
     }
   }
 
@@ -273,7 +314,7 @@ const DeptList = () => {
     toolBarRender: () => {
       return (
         <>
-          <SageButton type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</SageButton>
+          <SageButton type="primary" icon={<PlusOutlined />} onClick={() => onAdd()}>新增</SageButton>
           {/* <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={editable} style={{marginLeft: '8px'}}>编辑</SageButton> */}
           <SageButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{marginLeft: '8px'}}>全部展开/折叠</SageButton>
         </>
@@ -305,7 +346,7 @@ const DeptList = () => {
         res = await addDept(formData)
         break;
       case 'update':
-        formData.id = detail.id
+        formData.deptId = detail.deptId
         res = await updateDept(formData)
         break
       default:
@@ -329,6 +370,7 @@ const DeptList = () => {
         {...tableToolProps}
         {...tableProps}
         request={(params) => queryDept(params)}
+        dataParamName="data"
         renderData={data => renderDeptData(data)}
       />
 
@@ -344,6 +386,9 @@ const DeptList = () => {
           <CreateForm
             ref={createFormRef}
             onFinish={onFinish}
+            parentId={parentId}
+            parentIdOptions={deptList}
+            statusOptions={statusOptions}
           /> : null
         }
         {
@@ -352,6 +397,8 @@ const DeptList = () => {
             ref={updateFormRef}
             detail={detail}
             onFinish={onFinish}
+            parentIdOptions={parentIdOptions}
+            statusOptions={statusOptions}
           /> : null
         }
       </SageModal>

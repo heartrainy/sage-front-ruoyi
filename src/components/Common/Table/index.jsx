@@ -464,6 +464,14 @@ const SageTable = React.forwardRef((props, ref) => {
     getSelectedRows,
     setSelectedRows,
     getSearchFieldsValue: () => tableSearchFormRef.current.getFieldsValue(),
+    getSearchParamsValue: () => {
+      const fieldsValue = tableSearchFormRef.current.getFieldsValue()
+      const searchParams = Object.assign(fieldsValue, {
+        pageNum: tableState.pageNum,
+        pageSize: tableState.pageSize,
+      })
+      return searchParams
+    },
     getAllExpandedRowKeys,
     getExpandedRowKeys,
     setExpandedRowKeys,

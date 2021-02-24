@@ -85,6 +85,8 @@ const TableSearchForm = React.forwardRef((props, ref) => {
         formItemProps.valuePropName = 'checked'
       }
 
+
+      const { valueName = 'value', textName = 'text' } = item
       switch (item.type) {
         case 'select':
           formCompnentNode = (
@@ -92,7 +94,7 @@ const TableSearchForm = React.forwardRef((props, ref) => {
               {
                 item.options.map((item2, index2) => {
                   return (
-                    <Option value={item2.value} key={item2.value}>{item2.text}</Option>
+                    <Option value={item2[valueName]} key={item2[valueName]}>{item2[textName]}</Option>
                   )
                 })
               }

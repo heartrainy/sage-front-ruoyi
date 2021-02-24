@@ -1,5 +1,6 @@
 import { parse } from 'querystring';
 import pathRegexp from 'path-to-regexp';
+import { requestPrefix } from '@/services/prefix';
 
 /* eslint no-useless-escape:0 import/prefer-default-export:0 */
 const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
@@ -135,4 +136,42 @@ export function selectDictLabel(datas, value) {
 		}
 	})
 	return actions.join('');
+}
+
+/**
+ * 移除children为空数组的对象
+ * @param {*} list 
+ */
+export function removeChildren(list) {
+  list.forEach(item => {
+    if (item.children && item.children.length === 0) {
+      delete item.children
+    }
+    if (item.children && item.children.length !== 0) {
+      removeChildren(item.children)
+    }
+  })
+}
+
+// 添加日期范围
+export function addDateRange(params, dateParamName, propName, format = 'YYYY-MM-DD') {
+	const search = params;
+	search.params = {};
+  const dateRange = params[dateParamName]
+	if (null != dateRange && '' != dateRange) {
+		if (typeof(propName) === "undefined") {
+			search.params["beginTime"] = dateRange[0].format(format);
+			search.params["endTime"] = dateRange[1].format(format);
+		} else {
+			search.params["begin" + propName] = dateRange[0].format(format);
+			search.params["end" + propName] = dateRange[1].format(format);
+		}
+    delete search[dateParamName]
+	}
+	return search;
+}
+
+// 通用下载方法
+export function download(fileName) {
+	window.location.href = `/${requestPrefix}/common/download?fileName=${encodeURI(fileName)}&delete=true`;
 }

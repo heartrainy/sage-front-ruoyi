@@ -4,7 +4,7 @@ import { Card, Tabs } from 'antd'
 import { connect } from 'umi'
 import { SageLayoutLR, SageForm, SageMessage } from '@/components/Common'
 import { mobile, email } from '@/utils/verify'
-import { updateUser, modifyPwd } from '@/pages/user/manage/service'
+import { updateUser, resetPwd } from '@/pages/user/manage/service'
 
 import style from './style.less'
 
@@ -143,7 +143,7 @@ const Center = (props) => {
     const formData = Object.assign({}, values)
 
     // formData.loginId = userDetail.loginId
-    const res = await modifyPwd(formData)
+    const res = await resetPwd(formData)
 
     if (res.code === 200) {
       SageMessage.success('修改密码成功')

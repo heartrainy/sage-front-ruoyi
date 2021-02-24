@@ -1,11 +1,14 @@
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Modal, Switch } from 'antd'
+import prompt from 'antd-prompt';
 import moment from 'moment'
 import { SageLayoutLR, SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/components/Common'
-import { DeptTree } from '@/components/Business'
-import { PlusOutlined, RedoOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { queryUser, updateUser, addUser, removeUser, getUserDetail, openOrClose } from './service';
+import { DeptTree, ImportModal } from '@/components/Business'
+import { PlusOutlined, EditOutlined, DeleteOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined, RedoOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { getEnumDropDownList } from '@/services/enum'
+import { addDateRange, download } from '@/utils/utils'
+import { queryUser, updateUser, addUser, removeUser, getUserDetail, openOrClose, resetPwd, exportUser, importUser, uploadTemplate } from './service';
 import CreateForm from './components/CreateForm'
 import UpdateForm from './components/UpdateForm'
 
@@ -21,6 +24,12 @@ const TableList = () => {
   const [detail, setDetail] = useState(initDetail) // 详情
   const [status, setStatus] = useState('') // 状态 1、add 2、update 3、detail
   const [modalLoading, setModalLoading] = useState(false) // 窗口loading
+  const [statusOptions, setStatusOptions] = useState([])  //  状态Options
+  const [userSexOptions, setUserSexOptions] = useState([])  //  性别Options
+  const [postOptions, setPostOptions] = useState([])
+  const [roleOptions, setRoleOptions] = useState([])
+  const [single, setSingle] = useState(true) // 非单个禁用
+  const [multiple, setMultiple] = useState(true)  // 非多个禁用
 
   // ref对象
   const tableRef = useRef();
@@ -28,23 +37,68 @@ const TableList = () => {
   const createFormRef = useRef();
   const updateFormRef = useRef();
   const depttreeRef = useRef();
+  const importModalRef = useRef();
+
+  // 获取状态下拉数据
+  const requestStatusOptions = async () => {
+    const res = await getEnumDropDownList({ type: 'sys_normal_disable' })
+    if (res.code === 200) {
+      setStatusOptions(res.data)
+    }
+  }
+
+  // 获取用户性别下拉数据
+  const requestUserSexOptions = async () => {
+    const res = await getEnumDropDownList({ type: 'sys_user_sex' })
+    if (res.code === 200) {
+      setUserSexOptions(res.data)
+    }
+  }
+
+  useEffect(() => {
+    requestStatusOptions()
+    requestUserSexOptions()
+  }, [])
 
   // 查询条件
   const searchFields = [
     {
-      name: 'personName',
-      label: '用户名',
+      name: 'userName',
+      label: '用户名称',
       type: 'input',
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入用户名称',
+        allowClear: true
       }
     },
     {
-      name: 'mobile',
+      name: 'phonenumber',
       label: '手机号',
       type: 'input',
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入手机号',
+        allowClear: true
+      }
+    },
+    {
+      name: 'status',
+      label: '状态',
+      type: 'select',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      props: {
+        placeholder: '用户状态',
+        allowClear: true
+      }
+    },
+    {
+      name: 'createTime',
+      label: '创建时间',
+      type: 'rangepicker',
+      props: {
+        style: { width: '100%' },
+        allowClear: true
       }
     }
   ]
@@ -53,7 +107,7 @@ const TableList = () => {
   const onSearchTable = (params) => {
     if (tableRef.current) {
       const postParams = Object.assign({ pageNum: 1 }, params)
-      tableRef.current.queryTable(postParams)
+      tableRef.current.queryTable(addDateRange(postParams, 'createTime'))
     }
   }
 
@@ -75,24 +129,26 @@ const TableList = () => {
     event.stopPropagation()
 
     setStatus('update')
-    const res = await getUserDetail({ id: record.loginId })
-    const { data } = res
+    const res = await getUserDetail({ userId: record.userId })
+    const { data, posts, postIds, roles, roleIds } = res
+    setPostOptions(posts)
+    roles.forEach(item => item.disabled = item.status === '1')
+    setRoleOptions(roles)
     setDetail(data)
 
     modalRef.current.setTitle('编辑角色')
     modalRef.current.setVisible(true)
     updateFormRef.current.setFieldsValue({
-      personName: data.personName,
+      nickName: data.nickName,
+      userName: data.userName,
       sex: data.sex,
-      idNo: data.idNo,
-      personNo: data.personNo,
-      entryTime: data.entryTime ? moment(data.entryTime) : '',
-      orgnId: data.orgnId,
-      mobile: data.mobile,
+      deptId: data.deptId,
+      phonenumber: data.phonenumber,
       email: data.email,
-      roleIds: data.roleIds ? data.roleIds.split(',') : [],
-      status: data.status === '1',
-      headImage: data.headImage
+      postIds: postIds,
+      roleIds: roleIds,
+      status: data.status,
+      remark: data.remark
     })
   }
 
@@ -100,26 +156,54 @@ const TableList = () => {
   const handleDelete = async (event, record) => {
     event.stopPropagation()
 
-    const res = await removeUser({ id: record.loginId })
+    const res = await removeUser({ userId: record.userId })
     if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
     }
   }
 
+  // 重置密码
+  const handleReset = async (event, record) => {
+    event.stopPropagation()
+
+    try {
+      const newword = await prompt({
+        title: `请输入${record.userName}的新密码`,
+        placeholder: "",
+        rules: [
+          {
+            required: true,
+            message: "密码不能为空"
+          }
+        ]
+        // modalProps: {
+        //   width: '80%'
+        // }
+      });
+
+      const res = await resetPwd({ userId: record.userId, password: newword })
+      if (res.code === 200) {
+        SageMessage.success(`修改成功，新密码是：${newword}`)
+      }
+    } catch (error) {
+      SageMessage.warning(`请填写新密码`)
+    }
+  }
+
   // 不通过刷新列表请求修改列表状态
   const onChangeStatus = (checked, record) => {
     confirm({
-      title: `此操作将 "${checked ? '启用' : '停用'}" ${record.personName}, 是否继续？`,
+      title: `此操作将 "${checked ? '启用' : '停用'}" ${record.userName}, 是否继续？`,
       icon: <ExclamationCircleOutlined />,
       // content: 'Some descriptions',
       onOk: async () => {
-        const res = await openOrClose({ loginId: record.loginId })
+        const res = await openOrClose({ userId: record.userId, status: checked ? '0' : '1' })
         if (res.code === 200) {
           const tableData = tableRef.current.getDataSource()
           for (let i = 0; i < tableData.length; i++) {
-            if (tableData[i].loginId === record.loginId) {
-              tableData[i].status = checked ? '1' : '0'
+            if (tableData[i].userId === record.userId) {
+              tableData[i].status = checked ? '0' : '1'
               break;
             }
           }
@@ -136,37 +220,42 @@ const TableList = () => {
   // 表格
   const columns = [
     {
-      title: '用户名',
-      dataIndex: 'personName',
-      key: 'personName'
+      title: '用户编号',
+      dataIndex: 'userId',
+      key: 'userId',
+      align: 'center'
     },
     {
-      title: '性别',
-      dataIndex: 'sex',
-      key: 'sex',
-      render: text => text === '1' ? '男' : '女'
+      title: '用户名称',
+      dataIndex: 'userName',
+      key: 'userName'
     },
     {
-      title: '手机',
-      dataIndex: 'mobile',
-      key: 'mobile',
+      title: '用户昵称',
+      dataIndex: 'nickName',
+      key: 'nickName'
     },
     {
       title: '部门',
-      dataIndex: 'orgnName',
-      key: 'orgnName',
+      dataIndex: 'dept',
+      key: 'dept',
+      render: text => text?.deptName
     },
     {
-      title: '入职时间',
-      dataIndex: 'entryTime',
-      key: 'entryTime',
-      width: 160
+      title: '手机号码',
+      dataIndex: 'phonenumber',
+      key: 'phonenumber',
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (text, record) => <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={text === '1'} onChange={(checked) => onChangeStatus(checked, record)} />
+      render: (text, record) => <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={text === '0'} onChange={(checked) => onChangeStatus(checked, record)} />
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      key: 'createTime'
     },
     {
       title: '操作',
@@ -176,20 +265,30 @@ const TableList = () => {
       render: (button, record) => {
 
         const actionList = [
-          { title: '编辑', method: (e) => handleEdit(e, record) },
-          { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: '确认删除该角色?' },
+          { title: '编辑', method: (e) => handleEdit(e, record) }
         ]
+
+        if (record.userId !== 1) {
+          actionList.push({ title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除用户名称为"${record.userName}"的数据项?` })
+        }
+        actionList.push({ title: '重置', method: (e) => handleReset(e, record) },)
 
         return <ActionSet actionList={actionList} record={record} />
       },
-      width: 160
+      // width: 160
     }
   ]
 
   const tableProps = {
-    rowKey: 'loginId',
-    hasNumber: true,
-    columns
+    rowKey: 'userId',
+    // hasNumber: true,
+    hasCheck: true,
+    columns,
+    // 选中checkbox返回
+    onSelectedRow: (selectedrowkeys, selectedrows) => {
+      setSingle(selectedrowkeys.length !== 1)
+      setMultiple(!selectedrowkeys.length)
+    }
   }
 
   // 新建
@@ -204,12 +303,76 @@ const TableList = () => {
     }
   }
 
+  // 编辑
+  const onEdit = (e) => {
+    const rowRecords = tableRef.current.getSelectedRows()
+    handleEdit(e, rowRecords[0])
+  }
+
+  // 删除
+  const onDelete = (e) => {
+    e.stopPropagation()
+
+    const userIds = tableRef.current.getSelectedRowKeys()
+    const userRecords = tableRef.current.getSelectedRows()
+    const userNames = userRecords.map(item => item.userName)
+    confirm({
+      title: `是否确认删除用户名称为"${userNames.join(',')}"的数据项?`,
+      icon: <ExclamationCircleOutlined />,
+      // content: 'Some descriptions',
+      onOk: async () => {
+        
+        const res = await removeUser({ userId: userIds.join(',') })
+        if (res.code === 200) {
+          SageMessage.success('删除成功')
+          tableRef.current.reloadTable()
+        }
+      },
+      onCancel: () => {
+
+      },
+    });
+  }
+
+  // 导入
+  const onImport = (e) => {
+    e.stopPropagation()
+
+    importModalRef.current.setVisible(true)
+  }
+
+  // 导出
+  const onExport = async (e) => {
+    e.stopPropagation()
+
+    confirm({
+      title: '警告',
+      icon: <ExclamationCircleOutlined />,
+      content: '是否确认导出所有用户数据项?',
+      onOk: async () => {
+        const exportParams = tableRef.current.getSearchParamsValue()
+        console.log(exportParams)
+        const res = await exportUser(exportParams)
+        if (res.code === 200) {
+          download(res.msg)
+        }
+      },
+      onCancel: () => {
+
+      },
+    });
+  }
+
   // 表格按钮操作
   const tableToolProps = {
     toolBarRender: () => {
       return (
         <>
           <SageButton type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</SageButton>
+          <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={single} style={{ marginLeft: '8px' }}>编辑</SageButton>
+          <SageButton type="danger" icon={<DeleteOutlined />} onClick={(e) => onDelete(e)} disabled={multiple} style={{ marginLeft: '8px' }}>删除</SageButton>
+          <SageButton icon={<VerticalAlignTopOutlined />} onClick={(e) => onImport(e)} style={{marginLeft: '8px'}}>导入</SageButton>
+          <SageButton type="warning" icon={<VerticalAlignBottomOutlined />} onClick={(e) => onExport(e)} style={{marginLeft: '8px'}}>导出</SageButton>
         </>
       )
     },
@@ -231,7 +394,6 @@ const TableList = () => {
     const formData = Object.assign({}, values)
     // 处理赋值表单数据
     // TODO
-    formData.status = formData.status ? '1' : '0'
 
     let res = null
     setModalLoading(true)
@@ -240,7 +402,7 @@ const TableList = () => {
         res = await addUser(formData)
         break;
       case 'update':
-        formData.loginId = detail.loginId
+        formData.userId = detail.userId
         res = await updateUser(formData)
         break
       default:
@@ -259,11 +421,11 @@ const TableList = () => {
   const onRefreshDept = () => {
     depttreeRef.current.refresh()
     depttreeRef.current.setSelectedKeys([])
-    onSearchTable({orgnId: ''})
+    onSearchTable({ deptId: '' })
   }
 
-  const onSelectDept = (orgnId) => {
-    onSearchTable({orgnId})
+  const onSelectDept = (deptId) => {
+    onSearchTable({ deptId })
   }
 
   return (
@@ -276,14 +438,14 @@ const TableList = () => {
             <Card
               title="组织部门"
               extra={
-                <RedoOutlined style={{cursor: 'pointer'}} onClick={onRefreshDept} />
+                <RedoOutlined style={{ cursor: 'pointer' }} onClick={onRefreshDept} />
               }
               size="small"
               style={{ height: '100%' }}>
-                <DeptTree
-                  ref={depttreeRef}
-                  onSelect={onSelectDept}
-                />
+              <DeptTree
+                ref={depttreeRef}
+                onSelect={onSelectDept}
+              />
             </Card>
           </div>
         }
@@ -306,20 +468,32 @@ const TableList = () => {
       >
         {
           status === 'add' ?
-          <CreateForm
-            ref={createFormRef}
-            onFinish={onFinish}
-          /> : null
+            <CreateForm
+              ref={createFormRef}
+              onFinish={onFinish}
+              userSexOptions={userSexOptions}
+              statusOptions={statusOptions}
+            /> : null
         }
         {
           status === 'update' ?
-          <UpdateForm
-            ref={updateFormRef}
-            detail={detail}
-            onFinish={onFinish}
-          /> : null
+            <UpdateForm
+              ref={updateFormRef}
+              detail={detail}
+              onFinish={onFinish}
+              statusOptions={statusOptions}
+              userSexOptions={userSexOptions}
+              postOptions={postOptions}
+              roleOptions={roleOptions}
+            /> : null
         }
       </SageModal>
+
+      <ImportModal 
+        ref={importModalRef}
+        request={(params) => importUser(params)}
+        downloadTemplate={uploadTemplate}
+      />
 
     </PageHeaderWrapper>
   )

@@ -48,4 +48,12 @@ export async function getMenuByRoleId(params) {
   });
 }
 
+// 导出角色
+export async function exportRole(params) {
+  return request(`/${requestPrefix}/system/role/export`, {
+    method: 'GET',
+    params: {...params}
+  })
+}
+
 

@@ -19,9 +19,7 @@ const UpdateForm = (props, ref) => {
     const res = await queryMenu()
     if (res.code === 200) {
       const data = res.data.slice()
-      console.log(data)
       const tempData = handleTree(data, 'menuId')
-      console.log(tempData)
       const initData = [
         {
           value: 0,
@@ -61,7 +59,8 @@ const UpdateForm = (props, ref) => {
       type: 'treeselect',
       fieldNames: {title: 'menuName', value: 'menuId'},
       props: {
-        treeData: parentIdOptions
+        treeData: parentIdOptions,
+        placeholder: '选择上级菜单'
       }
     },
     {
@@ -80,7 +79,7 @@ const UpdateForm = (props, ref) => {
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入菜单名称'
       }
     },
     {
@@ -92,7 +91,7 @@ const UpdateForm = (props, ref) => {
         { pattern: poInteger, message: '请输入正整数' }
       ],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入显示排序'
       }
     },
     {
@@ -103,7 +102,7 @@ const UpdateForm = (props, ref) => {
         // { required: true },
       ],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入图标'
       },
       isShow: menuType !== 'F'
     },
@@ -121,19 +120,29 @@ const UpdateForm = (props, ref) => {
       name: 'path',
       label: '路由地址',
       type: 'input',
-      rules: [{ required: true }],
+      rules: [{ required: menuType !== 'F' }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入路由地址'
       },
+      isShow: menuType !== 'F'
+    },
+    {
+      name: 'component',
+      label: '组件路径',
+      type: 'input',
+      props: {
+        placeholder: '请输入组件路径'
+      },
+      isShow: menuType === 'C'
     },
     {
       name: 'perms',
       label: '权限标识',
       type: 'input',
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入权限标识'
       },
-      isShow: menuType !== 'M'
+      isShow: menuType === 'C' || menuType === 'F'
     },
     {
       name: 'visible',
@@ -153,6 +162,16 @@ const UpdateForm = (props, ref) => {
       textName: 'dictLabel',
       isShow: menuType !== 'F'
     },
+    {
+      name: 'isCache',
+      label: '是否缓存',
+      type: 'radio',
+      options: [
+        { value: '0', text: '缓存' },
+        { value: '1', text: '不缓存' }
+      ],
+      isShow: menuType === 'C'
+    }
   ]
 
   // 暴露外部方法

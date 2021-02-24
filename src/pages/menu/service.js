@@ -8,13 +8,12 @@ export async function queryMenu(params) {
   });
 }
 export async function removeMenu(params) {
-  return request(`/${requestPrefix}/party/menu/delete`, {
-    method: 'POST',
-    data: { ...params },
+  return request(`/${requestPrefix}/system/menu/${params.menuId}`, {
+    method: 'DELETE'
   });
 }
 export async function addMenu(params) {
-  return request(`/${requestPrefix}/party/menu/save`, {
+  return request(`/${requestPrefix}/system/menu`, {
     method: 'POST',
     data: { ...params },
   });
@@ -30,12 +29,5 @@ export async function updateMenu(params) {
 export function getMenuDetail(params) {
   return request(`/${requestPrefix}/system/menu/${params.menuId}`, {
     method: 'GET'
-  });
-}
-
-// 更新缓存
-export function clearMenu() {
-  return request(`/${requestPrefix}/party/menu/clearMenu`, {
-    method: 'GET',
   });
 }

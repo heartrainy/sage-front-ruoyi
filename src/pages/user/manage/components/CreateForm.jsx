@@ -2,40 +2,53 @@ import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
 import { mobile, email, idCode } from '@/utils/verify'
-import { queryDept } from '@/pages/dept/service'
-import { queryRole } from '@/pages/role/service'
+import { getTreeSelect } from '@/pages/dept/service'
+import { getPostsAndRoles } from '../service'
+
+// 遍历所有子节点数组改变结构
+function loopTree(arr) {
+  arr.forEach(item => {
+    item.title = item.label
+    item.key = item.id
+    if (item.children && item.children.length !== 0) {
+      item.children = item.children.slice()
+      loopTree(item.children)
+    }
+  })
+}
 
 const CreateForm = (props, ref) => {
-  const [orgnIdOptions, setOrgnIdOptions] = useState([])
+  const [deptTree, setDeptTree] = useState([])
+  const [postOptions, setPostOptions] = useState([])
   const [roleOptions, setRoleOptions] = useState([])
+
+  const { userSexOptions, statusOptions } = props
 
   const formRef = useRef()
 
-  // 初始化菜单下拉
-  const requestDeptList = async () => {
-    const res = await queryDept()
-    if (res.code === 200) {
-      const data = res.data.slice()
-      setOrgnIdOptions(data)
-    }
+  // 初始化组织部门下拉
+  const requestDeptTree = async () => {
+    const res = await getTreeSelect()
+    const { data } = res
+    const treeDataArr = data.slice()
+    loopTree(treeDataArr)
+    setDeptTree(treeDataArr)
   }
 
-  // 初始化角色数组
-  const requestRoleList = async () => {
-    const res = await queryRole({pageNum: 1, pageSize: 100})
+  // 初始化岗位和角色下拉数据
+  const requestPostsAndRoles = async () => {
+    const res = await getPostsAndRoles()
     if (res.code === 200) {
-      const data = res.data.slice()
-      data.forEach(item => {
-        item.label = item.roleName;
-        item.value = item.id.toString();
-      })
-      setRoleOptions(data)
+      const { posts, roles } = res
+      setPostOptions(posts)
+      roles.forEach(item => item.disabled = item.status === '1')
+      setRoleOptions(roles)
     }
   }
 
   useEffect(() => {
-    requestDeptList()
-    requestRoleList()
+    requestDeptTree()
+    requestPostsAndRoles()
   }, [])
 
   // 上传成功
@@ -56,60 +69,35 @@ const CreateForm = (props, ref) => {
   // 表单字段设置
   const formFields = [
     {
-      name: 'personName',
-      label: '用户名',
+      name: 'nickName',
+      label: '用户昵称',
       type: 'input',
-      rules: [{ required: true }]
-    },
-    {
-      name: 'sex',
-      label: '性别',
-      type: 'radio',
-      initialValue: '1',
-      options: [
-        { value: '1', text: '男' },
-        { value: '0', text: '女' },
-      ]
-    },
-    {
-      name: 'idNo',
-      label: '身份证号',
-      type: 'input',
-      rules: [{ pattern: idCode, message: '请输入正确的身份证号' }]
-    },
-    {
-      name: 'personNo',
-      label: '员工号',
-      type: 'input',
-      // rules: [{ required: true }]
-    },
-    {
-      name: 'entryTime',
-      label: '入职时间',
-      type: 'datepicker',
-      // rules: [{ required: true }],
+      rules: [{ required: true }],
       props: {
-        style: { width: '100%' }
+        placeholder: '请输入用户昵称'
       }
     },
     {
-      name: 'orgnId',
+      name: 'deptId',
       label: '归属部门',
       type: 'treeselect',
       // rules: [{ required: true }],
-      fieldNames: { title: 'orgnName', value: 'id' },
+      // fieldNames: { title: 'orgnName', value: 'id' },
       props: {
-        treeData: orgnIdOptions
+        treeData: deptTree
       },
     },
     {
-      name: 'mobile',
-      label: '手机号',
+      name: 'phonenumber',
+      label: '手机号吗',
       type: 'input',
       rules: [
-        { required: true },
-        { pattern: mobile, message: '请输入正确的手机号' }
-      ]
+        // { required: true },
+        { pattern: mobile, message: '请输入正确的手机号码' }
+      ],
+      props: {
+        placeholder: '请输入手机号码'
+      }
     },
     {
       name: 'email',
@@ -121,33 +109,84 @@ const CreateForm = (props, ref) => {
       ]
     },
     {
-      name: 'roleIds',
-      label: '角色',
-      type: 'checkbox',
-      span: 24,
-      labelCol: {span: 3},
-      options: roleOptions
+      name: 'userName',
+      label: '用户名',
+      type: 'input',
+      rules: [
+        { required: true }
+      ],
+      props: {
+        placeholder: '请输入用户名'
+      }
+    },
+    {
+      name: 'password',
+      label: '用户密码',
+      type: 'input',
+      rules: [
+        { required: true }
+      ],
+      initialValue: '123456',
+      props: {
+        type: 'password',
+        placeholder: '请输入用户密码'
+      }
+    },
+    {
+      name: 'sex',
+      label: '性别',
+      type: 'select',
+      options: userSexOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      props: {
+        placeholder: '请选择性别'
+      }
     },
     {
       name: 'status',
       label: '状态',
-      type: 'switch',
-      initialValue: true,
+      type: 'radio',
+      initialValue: '0',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel'
+    },
+    {
+      name: 'postIds',
+      label: '岗位',
+      type: 'select',
+      options: postOptions,
+      valueName: 'postId',
+      textName: 'postName',
       props: {
-        checkedChildren: '启用',
-        unCheckedChildren: '禁用'
+        mode: 'multiple',
+        placeholder: '请选择岗位'
       }
     },
     {
-      name: 'headImage',
-      label: '头像',
+      name: 'roleIds',
+      label: '角色',
+      type: 'select',
+      options: roleOptions,
+      valueName: 'roleId',
+      textName: 'roleName',
+      props: {
+        mode: 'multiple',
+        placeholder: '请选择角色'
+      }
+    },
+    {
+      name: 'remark',
+      label: '备注',
       span: 24,
-      labelCol: {span: 3},
-      type: 'simplepictureupload',
+      labelCol: { span: 3 },
+      wrapperCol: { span: 21 },
+      type: 'textarea',
       // rules: [{ required: true }],
       props: {
-        uploadSuccess
-      },
+        style: { width: '100%' }
+      }
     },
   ]
 
@@ -164,8 +203,8 @@ const CreateForm = (props, ref) => {
     <SageForm
       ref={formRef}
       colNum={2}
-      labelCol={ {span: 6 }}
-      wrapperCol={ {span: 18} }
+      labelCol={{ span: 6 }}
+      wrapperCol={{ span: 18 }}
       formFields={formFields}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}

@@ -4,6 +4,8 @@ import { SageForm } from '@/components/Common'
 
 const UpdateForm = (props, ref) => {
 
+  const { detail, statusOptions } = props
+
   const formRef = useRef()
 
   const onFinish = (values) => {
@@ -22,27 +24,43 @@ const UpdateForm = (props, ref) => {
       name: 'roleName',
       label: '角色名',
       type: 'input',
-      rules: [{ required: true }]
+      rules: [{ required: true }],
+      props: {
+        placeholder: '请输入角色名',
+      }
     },
     {
       name: 'roleKey',
       label: '权限字符',
       type: 'input',
-      rules: [{ required: true }]
+      rules: [{ required: true }],
+      props: {
+        placeholder: '请输入权限字符',
+      }
     },
     {
       name: 'roleSort',
-      label: '排序',
+      label: '角色排序',
       type: 'input',
-      rules: [{ required: true }]
+      rules: [{ required: true }],
+      props: {
+        placeholder: '请输入角色排序',
+      }
     },
     {
       name: 'status',
-      label: '状态',
-      type: 'switch',
+      label: '部门状态',
+      type: 'radio',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel'
+    },
+    {
+      name: 'remark',
+      label: '备注',
+      type: 'textarea',
       props: {
-        checkedChildren: '启用',
-        unCheckedChildren: '禁用'
+        placeholder: '请输入内容',
       }
     }
   ]

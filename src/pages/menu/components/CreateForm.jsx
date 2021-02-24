@@ -8,8 +8,10 @@ import { queryMenu } from '../service'
 const { Option } = Select
 
 const CreateForm = (props, ref) => {
-  const [menuType, setMenuType] = useState('0')
+  const [menuType, setMenuType] = useState('M')
   const [parentIdOptions, setParentIdOptions] = useState([])
+
+  const { parentId, visibleOptions, statusOptions } = props
 
   const formRef = useRef()
 
@@ -18,14 +20,15 @@ const CreateForm = (props, ref) => {
     const res = await queryMenu()
     if (res.code === 200) {
       const data = res.data.slice()
-      console.log(data)
+      const tempData = handleTree(data, 'menuId')
       const initData = [
         {
           value: '0',
           title: '主目录',
-          children: data
+          children: tempData
         }
       ]
+      // console.log(initData)
       setParentIdOptions(initData)
     }
   }
@@ -61,10 +64,11 @@ const CreateForm = (props, ref) => {
       name: 'parentId',
       label: '上级菜单',
       type: 'treeselect',
-      initialValue: '0',
-      fieldNames: {title: 'menuName', value: 'id'},
+      initialValue: parentId,
+      fieldNames: {title: 'menuName', value: 'menuId'},
       props: {
-        treeData: parentIdOptions
+        treeData: parentIdOptions,
+        placeholder: '选择上级菜单'
       }
     },
     {
@@ -73,9 +77,9 @@ const CreateForm = (props, ref) => {
       type: 'radio',
       initialValue: menuType,
       options: [
-        { value: '0', text: '目录' },
-        { value: '1', text: '菜单' },
-        { value: '2', text: '按钮' }
+        { value: 'M', text: '目录' },
+        { value: 'C', text: '菜单' },
+        { value: 'F', text: '按钮' }
       ]
     },
     {
@@ -84,47 +88,19 @@ const CreateForm = (props, ref) => {
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入菜单名称'
       }
-    },
-    {
-      name: 'url',
-      label: menuType === '0' || menuType === '1' ? '路由地址' : '请求地址',
-      type: 'input',
-      props: {
-        placeholder: '请输入'
-      }
-    },
-    {
-      name: 'target',
-      label: '打开方式',
-      type: 'radio',
-      initialValue: '1',
-      options: [
-        { value: '1', text: '页签' },
-        { value: '0', text: '新窗口' },
-      ],
-      isShow: menuType === '1'
-    },
-    {
-      name: 'perms',
-      label: '权限标识',
-      type: 'input',
-      props: {
-        placeholder: '请输入'
-      },
-      isShow: menuType === '1' || menuType === '2'
     },
     {
       name: 'orderNum',
-      label: '排序',
+      label: '显示排序',
       type: 'input',
       rules: [
         { required: true },
         { pattern: poInteger, message: '请输入正整数' }
       ],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入显示排序'
       }
     },
     {
@@ -135,21 +111,80 @@ const CreateForm = (props, ref) => {
         // { required: true },
       ],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入图标'
       },
-      isShow: menuType === '0' || menuType === '1'
+      isShow: menuType !== 'F'
     },
     {
-      name: 'status',
-      label: '菜单可见',
+      name: 'isFrame',
+      label: '是否外链',
       type: 'radio',
       initialValue: '1',
       options: [
-        { value: '1', text: '显示' },
-        { value: '0', text: '隐藏' },
+        { value: '0', text: '是' },
+        { value: '1', text: '否' },
       ],
-      isShow: menuType === '0' || menuType === '1'
+      isShow: menuType !== 'F'
     },
+    {
+      name: 'path',
+      label: '路由地址',
+      type: 'input',
+      rules: [{ required: menuType !== 'F' }],
+      props: {
+        placeholder: '请输入'
+      },
+      isShow: menuType !== 'F'
+    },
+    {
+      name: 'component',
+      label: '组件路径',
+      type: 'input',
+      props: {
+        placeholder: '请输入组件路径'
+      },
+      isShow: menuType === 'C'
+    },
+    {
+      name: 'perms',
+      label: '权限标识',
+      type: 'input',
+      props: {
+        placeholder: '请输入权限标识'
+      },
+      isShow: menuType === 'C' || menuType === 'F'
+    },
+    {
+      name: 'visible',
+      label: '显示状态',
+      type: 'radio',
+      initialValue: '0',
+      options: visibleOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      isShow: menuType !== 'F'
+    },
+    {
+      name: 'status',
+      label: '菜单状态',
+      type: 'radio',
+      initialValue: '0',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      isShow: menuType !== 'F'
+    },
+    {
+      name: 'isCache',
+      label: '是否缓存',
+      type: 'radio',
+      initialValue: '0',
+      options: [
+        { value: '0', text: '缓存' },
+        { value: '1', text: '不缓存' }
+      ],
+      isShow: menuType === 'C'
+    }
   ]
 
   // 暴露外部方法

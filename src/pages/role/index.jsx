@@ -1,15 +1,14 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Switch, Modal } from 'antd'
 import { SageLayoutLR, SageTable, SageModal, SageForm, SageButton, SageMessage, ActionSet } from '@/components/Common'
 import { MenuTree } from '@/components/Business'
-import { PlusOutlined, CheckOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { queryRole, updateRole, addRole, removeRole, getRoleDetail, openOrClose, getMenuByRoleId } from './service';
+import { PlusOutlined, CheckOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
+import { queryRole, updateRole, addRole, removeRole, getRoleDetail, openOrClose, getMenuByRoleId, exportRole } from './service';
 import { getEnumDropDownList } from '@/services/enum'
-import { deepClone } from '@/utils/utils'
+import { addDateRange, download } from '@/utils/utils'
 import CreateForm from './components/CreateForm'
 import UpdateForm from './components/UpdateForm'
-import { useEffect } from 'react'
 
 const { confirm } = Modal
 
@@ -29,6 +28,9 @@ const TableList = () => {
   // 获取状态下拉数据
   const requestStatusOptions = async () => {
     const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+    if (res.code === 200) {
+      setStatusOptions(res.data)
+    }
   }
 
   useEffect(() => {
@@ -49,7 +51,38 @@ const TableList = () => {
       label: '角色名',
       type: 'input',
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入角色名',
+        allowClear: true
+      }
+    },
+    {
+      name: 'roleKey',
+      label: '权限字符',
+      type: 'input',
+      props: {
+        placeholder: '请输入权限字符',
+        allowClear: true
+      }
+    },
+    {
+      name: 'status',
+      label: '状态',
+      type: 'select',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel',
+      props: {
+        placeholder: '角色状态',
+        allowClear: true
+      }
+    },
+    {
+      name: 'createTime',
+      label: '创建时间',
+      type: 'rangepicker',
+      props: {
+        style: {width: '100%'},
+        allowClear: true
       }
     }
   ]
@@ -58,7 +91,9 @@ const TableList = () => {
   const onSearchTable = (params) => {
     if (tableRef.current) {
       const postParams = Object.assign({ pageNum: 1 }, params)
-      tableRef.current.queryTable(postParams)
+      // 处理查询条件
+
+      tableRef.current.queryTable(addDateRange(postParams, 'createTime'))
     }
   }
 
@@ -84,13 +119,16 @@ const TableList = () => {
     const { data } = res
     setDetail(data)
 
+    requestMenuByRoleId(record)
+
     modalRef.current.setTitle('编辑角色')
     modalRef.current.setVisible(true)
     updateFormRef.current.setFieldsValue({
       roleKey: data.roleKey,
       roleName: data.roleName,
       roleSort: data.roleSort,
-      status: data.status === '0'
+      status: data.status,
+      remark: data.remark
     })
   }
 
@@ -116,13 +154,9 @@ const TableList = () => {
         filterMenuTree(item.children)
       }
     })
-
   }
 
-  // 授权菜单
-  const handleAuth = async (event, record) => {
-    event.stopPropagation()
-
+  const requestMenuByRoleId = async (record) => {
     const res = await getMenuByRoleId({ roleId: record.roleId })
     if (res.code === 200) {
       const { menus, checkedKeys } = res
@@ -130,16 +164,23 @@ const TableList = () => {
       menutreeRef.current.setMenuTree(menus)
       menutreeRef.current.setCheckedKeys(checkedKeys)
       setRole({
-        roleId: record.roleId,
+        ...record,
         menuIds: checkedKeys.slice()
       })
     }
   }
 
+  // 授权菜单
+  const handleAuth = async (event, record) => {
+    event.stopPropagation()
+
+    requestMenuByRoleId(record)
+  }
+
   // 不通过刷新列表请求修改列表状态
   const onChangeStatus = (checked, record) => {
-    console.log(checked)
-    console.log(record)
+    // console.log(checked)
+    // console.log(record)
     confirm({
       title: `此操作将 "${checked ? '启用' : '停用'}" ${record.roleName}, 是否继续？`,
       icon: <ExclamationCircleOutlined />,
@@ -193,7 +234,7 @@ const TableList = () => {
       title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
-      width: 200
+      // width: 200
     },
     {
       title: '操作',
@@ -205,12 +246,12 @@ const TableList = () => {
         const actionList = [
           { title: '菜单权限', method: (e) => handleAuth(e, record) },
           { title: '编辑', method: (e) => handleEdit(e, record) },
-          { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: '确认删除该角色?' },
+          { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除角色编号为"${record.roleName}"的数据项?` },
         ]
 
         return <ActionSet actionList={actionList} record={record} />
       },
-      width: 180
+      // width: 180
     }
   ]
 
@@ -232,12 +273,33 @@ const TableList = () => {
     }
   }
 
+  // 导出
+  const onExport = async () => {
+    confirm({
+      title: '警告',
+      icon: <ExclamationCircleOutlined />,
+      content: '是否确认导出所有角色数据项?',
+      onOk: async () => {
+        const exportParams = tableRef.current.getSearchParamsValue()
+        console.log(exportParams)
+        const res = await exportRole(exportParams)
+        if (res.code === 200) {
+          download(res.msg)
+        }
+      },
+      onCancel: () => {
+
+      },
+    });
+  }
+
   // 表格按钮操作
   const tableToolProps = {
     toolBarRender: () => {
       return (
         <>
           <SageButton type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</SageButton>
+          <SageButton type="warning" icon={<VerticalAlignBottomOutlined />} onClick={onExport} style={{marginLeft: '8px'}}>导出</SageButton>
         </>
       )
     },
@@ -259,16 +321,20 @@ const TableList = () => {
     const formData = Object.assign({}, values)
     // 处理赋值表单数据
     // TODO
-    formData.status = formData.status ? '0' : '1'
 
     let res = null
     setModalLoading(true)
     switch (status) {
       case 'add':
+        formData.menuCheckStrictly = true       // 默认父子关联
+        formData.deptCheckStrictly = true
+        formData.deptIds = []
+        formData.menuIds = []
         res = await addRole(formData)
         break;
       case 'update':
         formData.roleId = detail.roleId
+        formData.menuIds = role.menuIds
         res = await updateRole(formData)
         break
       default:
@@ -291,6 +357,9 @@ const TableList = () => {
     console.log(halfCheckedKeys)
     const pp = {
       roleId: role.roleId,
+      roleSort: role.roleSort,
+      roleKey: role.roleKey,
+      roleName: role.roleName,
       // authList: checkedKeys.checked   // 非关联
       menuIds: checkedKeys.concat(halfCheckedKeys) // 关联
     }
@@ -318,7 +387,7 @@ const TableList = () => {
         rightWidth={350}
         right={
           <div style={{ padding: 12, height: '100%' }}>
-            <Card title="菜单分配" extra={<SageButton disabled={Object.keys(role).length === 0} type="primary" onClick={onSaveMenuRole} icon={<CheckOutlined />}>保存</SageButton>} size="small" style={{ height: '100%' }}>
+            <Card title={`${role.roleName ? `${role.roleName}-`: ''}菜单分配`} extra={<SageButton disabled={Object.keys(role).length === 0} type="primary" onClick={onSaveMenuRole} icon={<CheckOutlined />}>保存</SageButton>} size="small" style={{ height: '100%' }}>
               <MenuTree
                 ref={menutreeRef}
               />
@@ -338,6 +407,7 @@ const TableList = () => {
           <CreateForm
             ref={createFormRef}
             onFinish={onFinish}
+            statusOptions={statusOptions}
           /> : null
         }
         {
@@ -346,6 +416,7 @@ const TableList = () => {
             ref={updateFormRef}
             detail={detail}
             onFinish={onFinish}
+            statusOptions={statusOptions}
           /> : null
         }
       </SageModal>

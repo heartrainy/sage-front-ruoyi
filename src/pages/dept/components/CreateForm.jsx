@@ -2,26 +2,13 @@ import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
 import { poInteger, email } from '@/utils/verify'
-import { queryDept } from '../service'
-
-const { Option } = Select
 
 const CreateForm = (props, ref) => {
-  const [parentIdOptions, setParentIdOptions] = useState([])
+  const { parentId, statusOptions, parentIdOptions } = props
 
   const formRef = useRef()
 
-  // 初始化菜单下拉
-  const requestDeptList = async () => {
-    const res = await queryDept()
-    if (res.code === 200) {
-      const data = res.data.slice()
-      setParentIdOptions(data)
-    }
-  }
-
   useEffect(() => {
-    requestDeptList()
   }, [])
 
   // 上传成功
@@ -46,37 +33,38 @@ const CreateForm = (props, ref) => {
   // 表单字段设置
   const formFields = [
     {
-      name: 'fatherOrgnId',
+      name: 'parentId',
       label: '上级部门',
       type: 'treeselect',
-      initialValue: 1,
+      initialValue: parentId,
       rules: [
         { required: true },
       ],
-      fieldNames: {title: 'orgnName', value: 'id'},
+      fieldNames: {title: 'deptName', value: 'deptId'},
       props: {
-        treeData: parentIdOptions
+        treeData: parentIdOptions,
+        placeholder: '选择上级部门',
       },
     },
     {
-      name: 'orgnName',
+      name: 'deptName',
       label: '部门名称',
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入部门名称'
       }
     },
     {
       name: 'orderNum',
-      label: '排序',
+      label: '显示排序',
       type: 'input',
       rules: [
         { required: true },
         { pattern: poInteger, message: '请输入正整数' }
       ],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入显示排序'
       }
     },
     {
@@ -85,7 +73,7 @@ const CreateForm = (props, ref) => {
       type: 'input',
       // rules: [{ required: true }],
       props: {
-        placeholder: '请输入',
+        placeholder: '请输入负责人',
         maxLength: 20
       }
     },
@@ -95,7 +83,7 @@ const CreateForm = (props, ref) => {
       type: 'input',
       // rules: [{ required: true }],
       props: {
-        placeholder: '请输入',
+        placeholder: '请输入联系电话',
         maxLength: 30
       }
     },
@@ -107,19 +95,18 @@ const CreateForm = (props, ref) => {
         { pattern: email, message: '请输入正确的邮箱' }
       ],
       props: {
-        placeholder: '请输入',
+        placeholder: '请输入邮箱',
       }
     },
     {
       name: 'status',
-      label: '状态',
-      type: 'switch',
-      initialValue: true,
-      props: {
-        checkedChildren: '启用',
-        unCheckedChildren: '禁用'
-      }
-    },
+      label: '部门状态',
+      type: 'radio',
+      initialValue: '0',
+      options: statusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel'
+    }
   ]
 
   // 暴露外部方法

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useImperativeHandle } from 'react'
 import { SageTree } from '@/components/Common'
-import { queryDept } from '@/pages/dept/service'
+import { getTreeSelect } from '@/pages/dept/service'
 
 // 遍历所有子节点数组改变结构
 function loopTree(arr) {
   arr.forEach(item => {
-    item.title = item.orgnName
+    item.title = item.label
     item.key = item.id
-    if (item.hasSun) {
+    if (item.children && item.children.length !== 0) {
       item.children = item.children.slice()
       loopTree(item.children)
     }
@@ -22,8 +22,8 @@ const DeptTree = (props, ref) => {
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
 
-  const requestDept = async () => {
-    const res = await queryDept()
+  const requestTreeSelect = async () => {
+    const res = await getTreeSelect()
     const { data } = res
     const treeDataArr = data.slice()
     loopTree(treeDataArr)
@@ -64,7 +64,7 @@ const DeptTree = (props, ref) => {
   }
 
   useEffect(() => {
-    requestDept()
+    requestTreeSelect()
   }, [])
 
   // 暴露给外部的方法
@@ -72,7 +72,7 @@ const DeptTree = (props, ref) => {
     setCheckedKeys,
     getCheckedKeys,
     setSelectedKeys,
-    refresh: requestDept,
+    refresh: requestTreeSelect,
     getData
   }))
 

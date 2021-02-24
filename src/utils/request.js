@@ -55,6 +55,38 @@ const request = extend({
   // credentials: 'include', // 默认请求是否带上cookie
 });
 
+// request interceptor, change url or options.
+request.interceptors.request.use((url, options) => {
+  
+  // get请求映射params参数
+  let lastUrl = url
+  if (options.method === 'get' && options.params) {
+    lastUrl = url + '?';
+    for (const propName of Object.keys(options.params)) {
+      const value = options.params[propName];
+      var part = encodeURIComponent(propName) + "=";
+      if (value !== null && typeof(value) !== "undefined") {
+        if (typeof value === 'object') {
+          for (const key of Object.keys(value)) {
+            let params = propName + '[' + key + ']';
+            var subPart = encodeURIComponent(params) + "=";
+            lastUrl += subPart + encodeURIComponent(value[key]) + "&";
+          }
+        } else {
+          lastUrl += part + encodeURIComponent(value) + "&";
+        }
+      }
+    }
+    lastUrl = lastUrl.slice(0, -1);
+    options.params = {};
+  }
+
+  return {
+    url: lastUrl,
+    options: { ...options },
+  };
+});
+
 request.interceptors.response.use(async (response) => {
   const data = await response.clone().json()
 

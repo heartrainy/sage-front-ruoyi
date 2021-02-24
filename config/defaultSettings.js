@@ -13,5 +13,5 @@ export default {
   },
   title: 'Sage Framework',
   pwa: false,
-  iconfontUrl: '//at.alicdn.com/t/font_2375293_novrnzfseb.js',
+  iconfontUrl: '//at.alicdn.com/t/font_2375293_346bkelyin3.js',
 };

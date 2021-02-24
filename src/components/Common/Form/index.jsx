@@ -23,6 +23,7 @@ import { UploadOutlined } from '@ant-design/icons'
 import SimplePictureUpload from '../Upload/SimplePictureUpload'
 import MultiplePictureUpload from '../Upload/MultiplePictureUpload'
 import NormalUpload from '../Upload/NormalUpload'
+// import { removeChildren } from '@/utils/utils'
 
 import './style.less'
 
@@ -174,7 +175,7 @@ const SageForm = (props, ref) => {
             {
               item.options.map((item2, index2) => {
                 return (
-                  <Option value={item2[valueName]} key={item2[valueName]}>{item2[textName]}</Option>
+                  <Option value={item2[valueName]} key={item2[valueName]} disabled={item2.disabled}>{item2[textName]}</Option>
                 )
               })
             }
@@ -206,14 +207,16 @@ const SageForm = (props, ref) => {
         break;
       case 'treeselect':
         if (item.fieldNames) {
-          const treeData = item.props.treeData ? item.props.treeData.slice() : []
+          const { treeData = [], ...otherProps } = item.props
           const loopCheckTreeData = list => {
             list.forEach(treeItem => {
               if (item.fieldNames.title && treeItem[item.fieldNames.title]) {
                 treeItem.title = treeItem[item.fieldNames.title]
+                // delete treeItem[item.fieldNames.value]
               }
               if (item.fieldNames.value && treeItem[item.fieldNames.value]) {
                 treeItem.value = treeItem[item.fieldNames.value]
+                // delete treeItem[item.fieldNames.value]
               }
               if (treeItem.children) {
                 loopCheckTreeData(treeItem.children)
@@ -221,11 +224,12 @@ const SageForm = (props, ref) => {
             })
           }
           loopCheckTreeData(treeData)
-          formCompnentNode = <FormComponent {...item.props} treeData={treeData} />
+          console.log(treeData)
+          formCompnentNode = <FormComponent {...otherProps} treeData={treeData} />
         } else {
+          console.log(1)
           formCompnentNode = <FormComponent {...item.props} />
         }
-
         break;
       case 'simplepictureupload':
         formCompnentNode = <FormComponent {...item} />
