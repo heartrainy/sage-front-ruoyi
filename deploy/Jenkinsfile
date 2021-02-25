@@ -17,6 +17,7 @@ node('jenkins-jnlp') {
         	if(env.ENV == 'pro'){
 		        // sh "npm install"
 		        // sh "npm run build"
+		        sh "rm -rf /data/sage2r"
 		        sh "mv ./dist /data/sage2r"
 	    	}
         }
