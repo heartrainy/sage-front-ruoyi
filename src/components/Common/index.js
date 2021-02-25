@@ -1,6 +1,6 @@
 import SageButton from './Button'
 import SageTable from './Table'
-import ActionSet from './ActionSet'
+import ActionSet from '../ActionSet'
 import SageModal from './Modal'
 import SageForm from './Form'
 import SageTree from './Tree'

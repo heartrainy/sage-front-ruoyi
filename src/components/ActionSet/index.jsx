@@ -1,5 +1,6 @@
 import React from 'react'
 import { Popconfirm, Divider } from 'antd'
+import AuthButton from '../AuthButton'
 
 /**
  *
@@ -23,12 +24,12 @@ const ActionSet = (props) => {
               onConfirm={item.method}
               okText="确定"
               cancelText="取消">
-              <a onClick={(e) => e.stopPropagation()}>{item.title}</a>
-            </Popconfirm> : <a onClick={item.method}>{item.title}</a>
+              <AuthButton auth={item.auth} type="link" size="small" onClick={(e) => e.stopPropagation()}>{item.title}</AuthButton>
+            </Popconfirm> : <AuthButton auth={item.auth} type="link" size="small" onClick={item.method}>{item.title}</AuthButton>
           }
           {
-            index < actionListState.length - 1 ?
-              <Divider type="vertical" /> : null
+            // index < actionListState.length - 1 ?
+            //   <Divider type="vertical" style={{margin: '0'}} /> : null
           }
         </span>
       )

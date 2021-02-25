@@ -3,7 +3,8 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Modal, Switch } from 'antd'
 import prompt from 'antd-prompt';
 import moment from 'moment'
-import { SageLayoutLR, SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/components/Common'
+import AuthButton from '@/components/AuthButton'
+import { SageLayoutLR, SageTable, SageModal, SageMessage, ActionSet } from '@/components/Common'
 import { DeptTree, ImportModal } from '@/components/Business'
 import { PlusOutlined, EditOutlined, DeleteOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined, RedoOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { getEnumDropDownList } from '@/services/enum'
@@ -265,13 +266,13 @@ const TableList = () => {
       render: (button, record) => {
 
         const actionList = [
-          { title: '编辑', method: (e) => handleEdit(e, record) }
+          { title: '编辑', auth: 'system:user:edit', method: (e) => handleEdit(e, record) }
         ]
 
         if (record.userId !== 1) {
-          actionList.push({ title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除用户名称为"${record.userName}"的数据项?` })
+          actionList.push({ title: '删除', auth: 'system:user:remove', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除用户名称为"${record.userName}"的数据项?` })
         }
-        actionList.push({ title: '重置', method: (e) => handleReset(e, record) },)
+        actionList.push({ title: '重置', auth: 'system:user:resetPwd', method: (e) => handleReset(e, record) },)
 
         return <ActionSet actionList={actionList} record={record} />
       },
@@ -372,15 +373,15 @@ const TableList = () => {
     toolBarRender: () => {
       return (
         <>
-          <SageButton type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</SageButton>
-          <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={single} style={{ marginLeft: '8px' }}>编辑</SageButton>
-          <SageButton type="danger" icon={<DeleteOutlined />} onClick={(e) => onDelete(e)} disabled={multiple} style={{ marginLeft: '8px' }}>删除</SageButton>
-          <SageButton icon={<VerticalAlignTopOutlined />} onClick={(e) => onImport(e)} style={{marginLeft: '8px'}}>导入</SageButton>
-          <SageButton type="warning" icon={<VerticalAlignBottomOutlined />} onClick={(e) => onExport(e)} style={{marginLeft: '8px'}}>导出</SageButton>
+          <AuthButton auth="system:user:add" type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</AuthButton>
+          <AuthButton auth="system:user:edit" type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={single} style={{ marginLeft: '8px' }}>编辑</AuthButton>
+          <AuthButton auth="system:user:remove" type="danger" icon={<DeleteOutlined />} onClick={(e) => onDelete(e)} disabled={multiple} style={{ marginLeft: '8px' }}>删除</AuthButton>
+          <AuthButton auth="system:user:import" icon={<VerticalAlignTopOutlined />} onClick={(e) => onImport(e)} style={{marginLeft: '8px'}}>导入</AuthButton>
+          <AuthButton auth="system:user:export" type="warning" icon={<VerticalAlignBottomOutlined />} onClick={(e) => onExport(e)} style={{marginLeft: '8px'}}>导出</AuthButton>
         </>
       )
     },
-    toolOptionConfig: ['reload', 'hiddensearch', 'density', 'fullScreen']
+    // toolOptionConfig: ['reload', 'hiddensearch', 'density', 'fullScreen', 'setting']
   }
 
   // 窗口确认按钮

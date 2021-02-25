@@ -1,1 +1,1 @@
-export const requestPrefix = 'api'
+export const requestPrefix = 'prod-api'

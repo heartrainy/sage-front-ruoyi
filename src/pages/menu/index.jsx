@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { connect } from 'umi'
 import { SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/components/Common'
+import AuthButton from '@/components/AuthButton'
 import { createFromIconfontCN, PlusOutlined, EditOutlined, ReloadOutlined, SwapOutlined, DeleteOutlined, VerticalAlignBottomOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { queryMenu, updateMenu, addMenu, removeMenu, getMenuDetail } from './service';
 import { getEnumDropDownList } from '@/services/enum'
@@ -208,9 +209,9 @@ const MenuList = (props) => {
       render: (button, record) => {
 
         const actionList = [
-          { title: '编辑', method: (e) => handleEdit(e, record) },
-          { title: '新增', method: (e) => handleAdd(e, record) },
-          { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除名称为"${record.menuName}"的数据项?` },
+          { title: '编辑', auth: 'system:menu:edit', method: (e) => handleEdit(e, record) },
+          { title: '新增', auth: 'system:menu:add', method: (e) => handleAdd(e, record) },
+          { title: '删除', auth: 'system:menu:remove', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除名称为"${record.menuName}"的数据项?` },
         ]
 
         return <ActionSet actionList={actionList} record={record} />
@@ -305,13 +306,13 @@ const MenuList = (props) => {
     toolBarRender: () => {
       return (
         <>
-          <SageButton type="primary" icon={<PlusOutlined />} onClick={() => onAdd()}>新增</SageButton>
+          <AuthButton auth="system:menu:add" type="primary" icon={<PlusOutlined />} onClick={() => onAdd()}>新增</AuthButton>
           {/* <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={editable} style={{marginLeft: '8px'}}>编辑</SageButton> */}
-          <SageButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{marginLeft: '8px'}}>全部展开/折叠</SageButton>
+          <AuthButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{marginLeft: '8px'}}>全部展开/折叠</AuthButton>
         </>
       )
     },
-    toolOptionConfig: ['reload', 'hiddensearch', 'density', 'fullScreen']
+    // toolOptionConfig: ['reload', 'hiddensearch', 'density', 'fullScreen', 'setting']
   }
 
   // 窗口确认按钮

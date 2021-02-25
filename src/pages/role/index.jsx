@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Switch, Modal } from 'antd'
 import { SageLayoutLR, SageTable, SageModal, SageForm, SageButton, SageMessage, ActionSet } from '@/components/Common'
+import AuthButton from '@/components/AuthButton'
 import { MenuTree } from '@/components/Business'
 import { PlusOutlined, CheckOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
 import { queryRole, updateRole, addRole, removeRole, getRoleDetail, openOrClose, getMenuByRoleId, exportRole } from './service';
@@ -245,8 +246,8 @@ const TableList = () => {
 
         const actionList = [
           { title: '菜单权限', method: (e) => handleAuth(e, record) },
-          { title: '编辑', method: (e) => handleEdit(e, record) },
-          { title: '删除', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除角色编号为"${record.roleName}"的数据项?` },
+          { title: '编辑', auth: 'system:role:edit', method: (e) => handleEdit(e, record) },
+          { title: '删除', auth: 'system:role:remove', method: (e) => handleDelete(e, record), isConfirm: true, confirmInfo: `是否确认删除角色编号为"${record.roleName}"的数据项?` },
         ]
 
         return <ActionSet actionList={actionList} record={record} />
@@ -298,12 +299,12 @@ const TableList = () => {
     toolBarRender: () => {
       return (
         <>
-          <SageButton type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</SageButton>
-          <SageButton type="warning" icon={<VerticalAlignBottomOutlined />} onClick={onExport} style={{marginLeft: '8px'}}>导出</SageButton>
+          <AuthButton auth='system:role:edit' type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</AuthButton>
+          <AuthButton auth='system:role:export' type="warning" icon={<VerticalAlignBottomOutlined />} onClick={onExport} style={{marginLeft: '8px'}}>导出</AuthButton>
         </>
       )
     },
-    toolOptionConfig: ['reload', 'hiddensearch', 'density', 'fullScreen']
+    // toolOptionConfig: ['reload', 'hiddensearch', 'density', 'fullScreen', 'setting']
   }
 
   // 窗口确认按钮

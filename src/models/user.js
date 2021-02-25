@@ -4,6 +4,7 @@ const UserModel = {
   namespace: 'user',
   state: {
     currentUser: {},
+    permissions: [],
     routers: []
   },
   effects: {
@@ -25,7 +26,7 @@ const UserModel = {
 
         yield put({
           type: 'saveCurrentUser',
-          payload: userInfo,
+          payload: { user: userInfo, permissions: response.permissions }
         });
       }
     },
@@ -42,11 +43,15 @@ const UserModel = {
     }
   },
   reducers: {
-    saveRouters(state, action ) {
-      return { ...state, routers: action.payload || []};
+    saveRouters(state, action) {
+      return { ...state, routers: action.payload || [] };
     },
-    saveCurrentUser(state, action) {
-      return { ...state, currentUser: action.payload || {} };
+    saveCurrentUser(state, { payload }) {
+      return { 
+        ...state, 
+        currentUser: payload.user || {}, 
+        permissions: payload.permissions || [] 
+      }
     },
     changeNotifyCount(
       state = {
