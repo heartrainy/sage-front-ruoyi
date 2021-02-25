@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[10],{YSdX:function(a,e,r){"use strict";r.r(e);var t=r("q1tI"),n=r.n(t),c=r("xWwf"),s=function(){return n.a.createElement("div",{className:"sage-page-wrapper"},n.a.createElement(c["BarChart"],{id:"demo-bar-1",className:"sage-chart-card"}))};e["default"]=s}}]);

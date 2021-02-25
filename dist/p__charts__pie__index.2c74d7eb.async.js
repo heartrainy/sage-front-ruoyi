@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[12],{Hvue:function(e,a,t){"use strict";t.r(a);var c=t("q1tI"),n=t.n(c),r=t("xWwf"),s=function(){return Object(c["useEffect"])((function(){}),[]),n.a.createElement("div",{className:"sage-page-wrapper"},n.a.createElement(r["PieChart"],{id:"demo-pie-1",className:"sage-chart-card"}))};a["default"]=s}}]);
