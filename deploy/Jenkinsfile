@@ -1,0 +1,24 @@
+node('jenkins-jnlp') {
+    env.PATH="/usr/local/nodejs/bin:${env.PATH}"
+    //checkout源代码
+    stage('Checkout') {
+        checkout scm
+    }
+    stage('Build npm') {
+        parallel dev:{
+            if(env.ENV == 'dev'){
+
+            }
+	    }, test:{
+        	if(env.ENV == 'test'){
+
+	    	}
+        }, pro: {
+        	if(env.ENV == 'pro'){
+		        sh "npm install"
+		        sh "npm run build"
+		        sh "mv ./dist /data/sage2r"
+	    	}
+        }
+    }
+}
