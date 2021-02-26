@@ -34,6 +34,10 @@ const Login = props => {
   }
 
   useEffect(() => {
+    if (localStorage.token) {
+      console.log(localStorage.token)
+      window.location.href = '/home'
+    }
     getCode()
   }, [])
 

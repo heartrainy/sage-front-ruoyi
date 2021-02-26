@@ -18,6 +18,8 @@ const checkPermissions = (authority, currentAuthority, target, Exception) => {
     return target;
   } // 数组处理
 
+  console.log(currentAuthority)
+
   if (Array.isArray(authority)) {
     if (Array.isArray(currentAuthority)) {
       if (currentAuthority.some(item => authority.includes(item))) {

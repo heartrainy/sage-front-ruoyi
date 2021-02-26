@@ -1,11 +1,26 @@
 import { queryCurrent, query as queryUsers, getRouters } from '@/services/user';
+import { deepClone } from '@/utils/utils';
+
+// 处理原路由数据中的path字段
+const filterRouterPath = (list, parentPath) => {
+  list.forEach(item => {
+    if (parentPath && !item.path.includes('http')) {
+      item.path = parentPath + '/' + item.path
+      item.parentPath = parentPath
+    }
+    if (item.children) {
+      filterRouterPath(item.children, item.path)
+    }
+  })
+}
 
 const UserModel = {
   namespace: 'user',
   state: {
     currentUser: {},
     permissions: [],
-    routers: []
+    routers: [],    // 接口返回路由原数据
+    filterRouters: [],    // 处理path字段后的路由数据
   },
   effects: {
     *fetch(_, { call, put }) {
@@ -33,18 +48,56 @@ const UserModel = {
     *getRouters(_, { call, put }) {
       const response = yield call(getRouters);
       if (response.code === 200) {
-        const routers = response.data
+        const routers = deepClone(response.data)
+        // 添加固定路由
+        routers.unshift({
+          hidden: false,
+          meta: {
+            icon: 'dashboard',
+            title: '首页'
+          },
+          name: 'Home',
+          path: '/home'
+        })
+
+        // 处理原路由数据中的path字段
+        const filterRouters = deepClone(routers)
+        filterRouterPath(filterRouters)
+
+        // 处理后的路由数据保存到global
+        yield put({
+          type: 'global/saveRouters',
+          payload: {
+            routers,
+            filterRouters
+          }
+        })
+
+        // 初始化tabbar和menu
+        yield put({
+          type: 'global/initTabAndMenu',
+          payload: {
+            filterRouters
+          }
+        })
 
         yield put({
           type: 'saveRouters',
-          payload: routers,
+          payload: {
+            routers,
+            filterRouters
+          }
         });
       }
     }
   },
   reducers: {
-    saveRouters(state, action) {
-      return { ...state, routers: action.payload || [] };
+    saveRouters(state, { payload }) {
+      return { 
+        ...state, 
+        routers: payload.routers || [],  
+        filterRouters: payload.filterRouters || []
+      };
     },
     saveCurrentUser(state, { payload }) {
       return { 

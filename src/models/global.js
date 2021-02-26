@@ -1,5 +1,26 @@
 import { history, dropByCacheKey } from 'umi'
+import { deepClone } from '@/utils/utils';
 import { queryNotices } from '@/services/user';
+
+function findAddRouter (path, list) {
+  let addRouter = null
+  for (let i = 0; i < list.length; i++) {
+    if (path.includes(list[i].path)) {
+      if (path === list[i].path) {
+        addRouter = deepClone(list[i])
+        if (addRouter.children) {
+          delete addRouter.children
+        }
+        break;
+      } else {
+        if (list[i].children && list[i].children.length !== 0) {
+          addRouter = findAddRouter(path, list[i].children)
+        }
+      }
+    }
+  }
+  return addRouter
+}
 
 const GlobalModel = {
   namespace: 'global',
@@ -8,11 +29,21 @@ const GlobalModel = {
     notices: [],
     menuSelectedKeys: [],
     menuOpenKeys: [],
-    tabActiveKey: '',
+    tabActiveKey: '/home',
     tabPanes: [
-      { title: '首页', key: '/home', closable: false }
+      {
+        hidden: false,
+        meta: {
+          icon: 'dashboard',
+          title: '首页'
+        },
+        name: 'Home',
+        path: '/home'
+      }
     ],
-    allPath: []
+    allPath: [],
+    routers: [],    // 接口返回路由原数据
+    filterRouters: [],    // 处理path字段后的路由数据
   },
   effects: {
     *fetchNotices(_, { call, put, select }) {
@@ -162,38 +193,89 @@ const GlobalModel = {
           ...newState
         },
       });
-    },
+    }
   },
   reducers: {
     updateState(state, { payload }) {
-      return {...state, ...payload}
+      return { ...state, ...payload }
     },
-    checkPaneExist(state, { payload }) {
+    saveRouters(state, { payload }) {
+      return { 
+        ...state, 
+        routers: payload.routers || [],  
+        filterRouters: payload.filterRouters || []
+      };
+    },
+    initTabAndMenu(state, { payload }) {
+      const { filterRouters } = payload
+      let { pathname } = location;
+      pathname = pathname === '/' ? '/home' : pathname
+      
       let isExist = false;
       for (let i = 0; i < state.tabPanes.length; i++) {
-        if (state.tabPanes[i].key === payload.path) {
+        if (state.tabPanes[i].path === pathname) {
           isExist = true;
           break;
         }
       }
-      if (!isExist) {
-        const p = state.allPath.find((item) => {
-          return item.path === payload.path;
-        });
-        if (p) {
-          const newPanes = state.tabPanes.slice();
-          newPanes.push({
-            // title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
-            title: p.menuName,
-            key: payload.path,
-          });
 
-          return {...state, tabPanes: newPanes}
-          // setPanes(newPanes);
+      if (!isExist) {
+        const addTab = findAddRouter(pathname, filterRouters)
+
+        if (addTab) {
+          const newPanes = deepClone(state.tabPanes);
+          newPanes.push(addTab);
+
+          return { 
+            ...state,
+            menuSelectedKeys: [pathname],
+            menuOpenKeys: [addTab.parentPath],
+            tabActiveKey: pathname, 
+            tabPanes: newPanes 
+          }
         }
       }
+
       return {
-        ...state
+        ...state,
+        menuSelectedKeys: [pathname],
+        tabActiveKey: pathname
+      }
+    },
+    checkPaneExist(state, { payload }) {
+      const { path } = payload
+
+      let isExist = false;
+      for (let i = 0; i < state.tabPanes.length; i++) {
+        if (state.tabPanes[i].path === path) {
+          isExist = true;
+          break;
+        }
+      }
+
+      console.log(isExist ? '存在' : '不存在')
+
+      if (!isExist) {
+        const addTab = findAddRouter(path, state.filterRouters)
+
+        if (addTab) {
+          const newPanes = deepClone(state.tabPanes);
+          newPanes.push(addTab);
+
+          return { 
+            ...state,
+            menuSelectedKeys: [path],
+            menuOpenKeys: [addTab.parentPath],
+            tabActiveKey: path, 
+            tabPanes: newPanes 
+          }
+        }
+      }
+
+      return {
+        ...state,
+        menuSelectedKeys: [path],
+        tabActiveKey: path
       }
     },
     changeLayoutCollapsed(

@@ -92,11 +92,16 @@ request.interceptors.response.use(async (response, options) => {
   const data = await response.clone().json()
 
   if (data && data.code !== 200) {
-    if (!options.params.hideError) {
+    if (!options.hideError) {
       notification.destroy()
       notification.error({
           message: data.msg
       })
+    }
+
+    if (data.code === 401 && !options.ignoreBack) {
+      localStorage.token = ''
+      location.href = '/user/login';
     }
   }
 

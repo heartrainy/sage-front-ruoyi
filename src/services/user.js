@@ -1,15 +1,19 @@
-import sageRequest from '@/utils/request';
+import request from '@/utils/request';
 import { requestPrefix } from '@/services/prefix';
 
 export async function query() {
-  return sageRequest('/api/users');
+  return request('/api/users');
 }
 export async function queryCurrent() {
-  return sageRequest(`/${requestPrefix}/getInfo`);
+  return request(`/${requestPrefix}/getInfo`);
 }
 export async function queryNotices() {
-  return sageRequest('/api/notices');
+  return request('/api/notices');
 }
 export async function getRouters() {
-  return sageRequest(`/${requestPrefix}/getRouters`);
+  return request(`/${requestPrefix}/getRouters`, {
+    method: 'GET',
+    hideError: true,
+    ignoreBack: true
+  });
 }

@@ -20,7 +20,8 @@ const Model = {
           type: 'changeLoginStatus',
           payload: {
             status: 'success',
-            type: 'account'
+            type: 'account',
+            currentAuthority: 'guest'
           },
         }); // Login successfully
 
@@ -48,7 +49,10 @@ const Model = {
           }
         }
 
-        history.replace(redirect || '/');
+        // history.replace(redirect || '/');
+        // reload刷新动态路由
+        window.location.href = redirect || '/'
+
       } else {
         yield put({
           type: 'changeLoginStatus',
@@ -71,12 +75,13 @@ const Model = {
         localStorage.token = ''
 
         if (window.location.pathname !== '/user/login' && !redirect) {
-          history.replace({
-            pathname: '/user/login',
-            search: stringify({
-              redirect: window.location.href,
-            }),
-          });
+          // history.replace({
+          //   pathname: '/user/login',
+          //   search: stringify({
+          //     redirect: window.location.href,
+          //   }),
+          // });
+          window.location.href = '/user/login'
         }
       }
     },
@@ -96,7 +101,9 @@ const Model = {
   },
   reducers: {
     changeLoginStatus(state, { payload }) {
-      // setAuthority(payload.currentAuthority);
+      if (payload.currentAuthority) {
+        setAuthority(payload.currentAuthority);
+      }
       return { ...state, ...payload };
     },
   },

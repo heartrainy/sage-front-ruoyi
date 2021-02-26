@@ -4,126 +4,59 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { useLocation, useIntl, history, dropByCacheKey, connect } from 'umi';
 import './style.less';
 
-const { REACT_APP_ENV } = process.env;
-
 const { TabPane } = Tabs;
 
 const TabBar = (props) => {
   const location = useLocation();
   let { pathname } = location;
   const {
-    menuTree,
+    filterRouters,
     tabActiveKey,
     tabPanes,
     allPath
   } = props;
 
   pathname = pathname === '/' ? '/home' : pathname
-  // const [panes, setPanes] = useState([
-  //   { title: '首页', key: '/home', closable: false },
-  //   // { title: '测试标签1', key: '2' },
-  //   // { title: '测试标签2', key: '3' },
-  //   // { title: 'Crud', key: '/demo/crud' },
-  //   // { title: '测试标签3', key: '4' },
-  //   // { title: '测试标签4', key: '5' },
-  //   // { title: '测试标签5', key: '6' },
-  //   // { title: '测试标签6', key: '7' },
-  //   // { title: '测试标签7', key: '8' },
-  //   // { title: '测试标签8', key: '9' },
-  //   // { title: '测试标签9', key: '10' },
-  //   // { title: '测试标签10', key: '11' },
-  //   // { title: '测试标签11', key: '12' },
-  //   // { title: '测试标签12', key: '13' }
-  // ]);
-  // const [activeKey, setActiveKey] = useState('');
-  // const [allPath, setAllPath] = useState([]);
 
   const { formatMessage } = useIntl();
 
-  const checkPaneExist = (path) => {
-    let isExist = false;
-    for (let i = 0; i < tabPanes.length; i++) {
-      if (tabPanes[i].key === path) {
-        isExist = true;
-        break;
-      }
-    }
-    if (!isExist) {
-      const p = allPath.find((item) => {
-        return item.path === path;
-      });
-      if (p) {
-        const newPanes = tabPanes.slice();
-        newPanes.push({
-          title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
-          key: path,
-        });
-        props.dispatch({
-          type: 'global/updateState',
-          payload: {
-            tabPanes: newPanes
-          }
-        })
-        // setPanes(newPanes);
-      }
-    }
-  };
+  // const checkPaneExist = (path) => {
+  //   let isExist = false;
+  //   for (let i = 0; i < tabPanes.length; i++) {
+  //     if (tabPanes[i].key === path) {
+  //       isExist = true;
+  //       break;
+  //     }
+  //   }
+  //   if (!isExist) {
+  //     const p = allPath.find((item) => {
+  //       return item.path === path;
+  //     });
+  //     if (p) {
+  //       const newPanes = tabPanes.slice();
+  //       newPanes.push({
+  //         title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
+  //         key: path,
+  //       });
+  //       props.dispatch({
+  //         type: 'global/updateState',
+  //         payload: {
+  //           tabPanes: newPanes
+  //         }
+  //       })
+  //       // setPanes(newPanes);
+  //     }
+  //   }
+  // };
 
   // 初始化
   useEffect(() => {
-    const list = [];
-    const loopPath = (arr) => {
-      arr.forEach((item) => {
-        list.push(item);
-        if (item.hasSun || (item.children && item.children.length !== 0)) {
-          const clist = item.children.slice();
-          loopPath(clist);
-        }
-      });
-    };
-    loopPath(menuTree || []);
-    props.dispatch({
-      type: 'global/updateState',
-      payload: {
-        allPath: list
-      }
-    })
-    // setAllPath(list);
-
-    let isExist = false;
-    for (let i = 0; i < tabPanes.length; i++) {
-      if (tabPanes[i].key === pathname) {
-        isExist = true;
-        break;
-      }
-    }
-    if (!isExist) {
-      const p = list.find((item) => {
-        return item.path === pathname;
-      });
-      if (p) {
-        const newPanes = tabPanes.slice();
-        newPanes.push({
-          title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
-          key: pathname,
-        });
-        props.dispatch({
-          type: 'global/updateState',
-          payload: {
-            tabPanes: newPanes
-          }
-        })
-        // setPanes(newPanes);
-      }
-    }
-
-    props.dispatch({
-      type: 'global/updateState',
-      payload: {
-        tabActiveKey: pathname
-      }
-    })
-    // setActiveKey(pathname);
+    // props.dispatch({
+    //   type: 'global/checkPaneExist',
+    //   payload: {
+    //     path: pathname
+    //   }
+    // })
   }, []);
 
   const onChange = (activekey, fromMenu) => {
@@ -246,7 +179,7 @@ const TabBar = (props) => {
           onEdit={onEdit}
         >
           {tabPanes.map((pane) => (
-            <TabPane tab={pane.title} key={pane.key} closable={pane.closable} />
+            <TabPane tab={pane.meta.title} key={pane.path} closable={pane.name !== 'Home' } />
           ))}
         </Tabs>
       </div>
@@ -259,7 +192,9 @@ const TabBar = (props) => {
   );
 };
 
-export default connect(({ global }) => ({
+export default connect(({ user, global }) => ({
+  routers: user.routers,
+  filterRouters: user.filterRouters,
   collapsed: global.collapsed,
   menuSelectedKeys: global.menuSelectedKeys,
   menuOpenKeys: global.menuOpenKeys,

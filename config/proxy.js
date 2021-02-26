@@ -7,13 +7,13 @@
  */
 export default {
   dev: {
-    '/api/': {
+    '/prod-api/': {
       // target: 'http://192.168.1.83:7777',
       target: 'http://47.103.50.109:8888',
       // target: 'https://vue.ruoyi.vip/prod-api',
       changeOrigin: true,
       pathRewrite: {
-        '^/api': '',
+        '^/prod-api': '',
       },
     },
   },

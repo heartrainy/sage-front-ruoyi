@@ -78,15 +78,13 @@ const BasicLayout = (props) => {
     },
     currentUser,
     routers,
+    filterRouters,
     route,
     collapsed,
     menuSelectedKeys,
     menuOpenKeys,
     // tabActiveKey
   } = props;
-
-  // const [selectedKeys, setSelectedKeys] = useState([location.pathname])
-  // const [openKeys, setOpenKeys] = useState([])
 
   const IconFont = createFromIconfontCN({
     scriptUrl: settings.iconfontUrl,
@@ -95,8 +93,6 @@ const BasicLayout = (props) => {
   /**
    * constructor
    */
-
-  // const tabBarRef = useRef();
 
   const handleMenuCollapse = (payload) => {
     if (dispatch) {
@@ -118,34 +114,9 @@ const BasicLayout = (props) => {
   // };
   // const { formatMessage } = useIntl();
 
-  // 处理左侧菜单数据
-  const filterMenuTree = (list, parentPath) => {
-    list.forEach(item => {
-      if (parentPath && !item.path.includes('http')) {
-        item.path = parentPath + '/' + item.path
-      }
-      if (item.children) {
-        filterMenuTree(item.children, item.path)
-      }
-    })
-  }
-
   // 获取左侧菜单
   const getMenuTree = () => {
-    const list = deepClone(routers)
-    filterMenuTree(list)
-
-    // 添加固定路由
-    list.unshift({
-      hidden: false,
-      meta: {
-        icon: 'dashboard',
-        title: '首页'
-      },
-      name: 'Home',
-      path: '/home'
-    })
-    // console.log(list)
+    const list = deepClone(filterRouters)
     return list
   }
 
@@ -174,15 +145,8 @@ const BasicLayout = (props) => {
 
   // 选中菜单
   const handleSelectMenu = ({ item, key }) => {
-    props.dispatch({
-      type: 'global/updateState',
-      payload: {
-        menuSelectedKeys: [key],
-        tabActiveKey: key
-      }
-    })
-    // setSelectedKeys([key])
 
+    // 判断tabbar
     props.dispatch({
       type: 'global/checkPaneExist',
       payload: {
@@ -190,10 +154,8 @@ const BasicLayout = (props) => {
       }
     })
 
+    // 页面跳转
     history.push(key)
-    // if (tabBarRef.current) {
-    //   tabBarRef.current.onChange(key, true);
-    // }
   }
 
   const handleOpenChange = (_openKeys) => {
@@ -203,7 +165,6 @@ const BasicLayout = (props) => {
         menuOpenKeys: _openKeys.length > 1 ? [_openKeys.slice().pop()] : _openKeys
       }
     })
-    // setOpenKeys(_openKeys.length > 1 ? [_openKeys.slice().pop()] : _openKeys)
   }
 
   // 判断菜单展开折叠
@@ -232,22 +193,10 @@ const BasicLayout = (props) => {
   }
 
   useEffect(() => {
-    let currentPath = location.pathname
-    if (currentPath === '/') {
-      currentPath = '/home'
-    }
 
     dispatch({
       type: 'user/getRouters'
     })
-
-    dispatch({
-      type: 'global/updateState',
-      payload: {
-        menuSelectedKeys: [currentPath]
-      }
-    })
-    // checkMenuOpen(currentPath)
 
   }, []);
   /**
@@ -258,16 +207,6 @@ const BasicLayout = (props) => {
   const goCenter = () => {
     checkMenuOpen('/system/center')
     handleSelectMenu({ key: '/system/center' })
-    // const panes = tabBarRef.current.getPanes()
-    // if (!panes.some(item => item.key === '/system/center')) {
-    //   panes.push({
-    //     title: '个人中心',
-    //     key: '/system/center'
-    //   })
-    //   tabBarRef.current.setPanes(panes);
-    // }
-    // tabBarRef.current.setActiveKey('/system/center');
-    // history.push('/system/center');
   }
 
   return (
@@ -310,10 +249,7 @@ const BasicLayout = (props) => {
             <RightContent goCenter={goCenter} />
           </div>
           <TabBar
-            // ref={tabBarRef}
             currentUser={currentUser}
-            // menuTree={menuTree}
-            // setSelectedKeys={setSelectedKeys}
             checkMenuOpen={checkMenuOpen}
           />
         </div>
@@ -380,6 +316,7 @@ const BasicLayout = (props) => {
 
 export default connect(({ user, global, settings }) => ({
   routers: user.routers,
+  filterRouters: user.filterRouters,
   currentUser: user.currentUser,
   collapsed: global.collapsed,
   menuSelectedKeys: global.menuSelectedKeys,
