@@ -4,7 +4,7 @@ import { Card, Switch, Modal } from 'antd'
 import { SageLayoutLR, SageTable, SageModal, SageForm, SageButton, SageMessage, ActionSet } from '@/components/Common'
 import AuthButton from '@/components/AuthButton'
 import { MenuTree } from '@/components/Business'
-import { PlusOutlined, CheckOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
 import { queryRole, updateRole, addRole, removeRole, getRoleDetail, openOrClose, getMenuByRoleId, exportRole } from './service';
 import { getEnumDropDownList } from '@/services/enum'
 import { addDateRange, download } from '@/utils/utils'
@@ -25,10 +25,12 @@ const TableList = () => {
   const [modalLoading, setModalLoading] = useState(false) // 窗口loading
   const [role, setRole] = useState({})   // 菜单分配对象
   const [statusOptions, setStatusOptions] = useState([])  //  状态Options
+  const [single, setSingle] = useState(true) // 非单个禁用
+  const [multiple, setMultiple] = useState(true)  // 非多个禁用
 
   // 获取状态下拉数据
   const requestStatusOptions = async () => {
-    const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+    const res = await getEnumDropDownList({ type: 'sys_normal_disable' })
     if (res.code === 200) {
       setStatusOptions(res.data)
     }
@@ -82,7 +84,7 @@ const TableList = () => {
       label: '创建时间',
       type: 'rangepicker',
       props: {
-        style: {width: '100%'},
+        style: { width: '100%' },
         allowClear: true
       }
     }
@@ -141,6 +143,8 @@ const TableList = () => {
     if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
+      setSingle(true)
+      setMultiple(true)
     }
   }
 
@@ -209,7 +213,12 @@ const TableList = () => {
   // 表格
   const columns = [
     {
-      title: '角色名',
+      title: '角色编号',
+      dataIndex: 'roleId',
+      key: 'roleId',
+    },
+    {
+      title: '角色名称',
       dataIndex: 'roleName',
       key: 'roleName',
       // width: 200,
@@ -258,8 +267,13 @@ const TableList = () => {
 
   const tableProps = {
     rowKey: 'roleId',
-    hasNumber: true,
-    columns
+    hasCheck: true,
+    columns,
+    // 选中checkbox返回
+    onSelectedRow: (selectedrowkeys, selectedrows) => {
+      setSingle(selectedrowkeys.length !== 1)
+      setMultiple(!selectedrowkeys.length)
+    }
   }
 
   // 新建
@@ -272,6 +286,39 @@ const TableList = () => {
         createFormRef.current.resetFields()
       }
     }
+  }
+
+  // 编辑
+  const onEdit = (e) => {
+    const rowRecords = tableRef.current.getSelectedRows()
+    handleEdit(e, rowRecords[0])
+  }
+
+  // 删除
+  const onDelete = (e) => {
+    e.stopPropagation()
+
+    const roleIds = tableRef.current.getSelectedRowKeys()
+    const roleRecords = tableRef.current.getSelectedRows()
+    const roleNames = roleRecords.map(item => item.roleName)
+    confirm({
+      title: `是否确认删除角色名称为"${roleNames.join(',')}"的数据项?`,
+      icon: <ExclamationCircleOutlined />,
+      // content: 'Some descriptions',
+      onOk: async () => {
+
+        const res = await removeRole({ roleId: roleIds.join(',') })
+        if (res.code === 200) {
+          SageMessage.success('删除成功')
+          tableRef.current.reloadTable()
+          setSingle(true)
+          setMultiple(true)
+        }
+      },
+      onCancel: () => {
+
+      },
+    });
   }
 
   // 导出
@@ -299,8 +346,10 @@ const TableList = () => {
     toolBarRender: () => {
       return (
         <>
-          <AuthButton auth='system:role:edit' type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</AuthButton>
-          <AuthButton auth='system:role:export' type="warning" icon={<VerticalAlignBottomOutlined />} onClick={onExport} style={{marginLeft: '8px'}}>导出</AuthButton>
+          <AuthButton auth='system:role:add' type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</AuthButton>
+          <AuthButton auth="system:role:edit" type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={single} style={{ marginLeft: '8px' }}>编辑</AuthButton>
+          <AuthButton auth="system:role:remove" type="danger" icon={<DeleteOutlined />} onClick={(e) => onDelete(e)} disabled={multiple} style={{ marginLeft: '8px' }}>删除</AuthButton>
+          <AuthButton auth='system:role:export' type="warning" icon={<VerticalAlignBottomOutlined />} onClick={onExport} style={{ marginLeft: '8px' }}>导出</AuthButton>
         </>
       )
     },
@@ -389,7 +438,7 @@ const TableList = () => {
         rightWidth={350}
         right={
           <div style={{ padding: 12, height: '100%' }}>
-            <Card title={`${role.roleName ? `${role.roleName}-`: ''}菜单分配`} extra={<SageButton disabled={Object.keys(role).length === 0} type="primary" onClick={onSaveMenuRole} icon={<CheckOutlined />}>保存</SageButton>} size="small" style={{ height: '100%' }}>
+            <Card title={`${role.roleName ? `${role.roleName}-` : ''}菜单分配`} extra={<SageButton disabled={Object.keys(role).length === 0} type="primary" onClick={onSaveMenuRole} icon={<CheckOutlined />}>保存</SageButton>} size="small" style={{ height: '100%' }}>
               <MenuTree
                 ref={menutreeRef}
               />
@@ -406,20 +455,20 @@ const TableList = () => {
       >
         {
           status === 'add' ?
-          <CreateForm
-            ref={createFormRef}
-            onFinish={onFinish}
-            statusOptions={statusOptions}
-          /> : null
+            <CreateForm
+              ref={createFormRef}
+              onFinish={onFinish}
+              statusOptions={statusOptions}
+            /> : null
         }
         {
           status === 'update' ?
-          <UpdateForm
-            ref={updateFormRef}
-            detail={detail}
-            onFinish={onFinish}
-            statusOptions={statusOptions}
-          /> : null
+            <UpdateForm
+              ref={updateFormRef}
+              detail={detail}
+              onFinish={onFinish}
+              statusOptions={statusOptions}
+            /> : null
         }
       </SageModal>
 

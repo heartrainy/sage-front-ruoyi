@@ -1,4 +1,5 @@
 import { history, dropByCacheKey } from 'umi'
+import pathToRegexp from 'path-to-regexp'
 import { deepClone } from '@/utils/utils';
 import { queryNotices } from '@/services/user';
 
@@ -106,17 +107,18 @@ const GlobalModel = {
         },
       });
     },
-    // 跳转tab
+    // 跳转tab 左侧菜单中不存在
     *goTab({ payload }, { put, select }) {
       const globalState = yield select(state => state.global)
 
       const newState = {}
-      newState.menuSelectedKeys = [payload.path]
+      // newState.menuSelectedKeys = [payload.path]
+      newState.menuSelectedKeys = []
       newState.tabActiveKey = payload.path
 
       let isExist = false;
       for (let i = 0; i < globalState.tabPanes.length; i++) {
-        if (globalState.tabPanes[i].key === payload.path) {
+        if (globalState.tabPanes[i].path === payload.path) {
           isExist = true;
           break;
         }
@@ -124,9 +126,13 @@ const GlobalModel = {
       if (!isExist) {
         const newPanes = globalState.tabPanes.slice();
         newPanes.push({
-          // title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
-          title: payload.name,
-          key: payload.path,
+          hidden: false,
+          meta: {
+            // icon: 'dashboard',
+            title: payload.name
+          },
+          // name: 'Home',
+          path: payload.path
         });
         newState.tabPanes = newPanes
       }
@@ -317,6 +323,19 @@ const GlobalModel = {
         if (typeof window.ga !== 'undefined') {
           window.ga('send', 'pageview', pathname + search);
         }
+
+        // 监听字典数据详情页
+        // const match = pathToRegexp('/dict/type/data/:dictId').exec(pathname);
+        // if (match) {
+        //   const path = match[0];
+				// 	// dispatch action with userId
+        //   history.push({
+        //     pathname: '/transition',
+        //     query: {
+        //       path: path,
+        //     }
+        //   })
+        // }
       });
     },
   },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useImperativeHandle } from 'react';
+import pathToRegexp from 'path-to-regexp'
 import { Tabs, Menu, Dropdown, Button } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { useLocation, useIntl, history, dropByCacheKey, connect } from 'umi';
@@ -18,70 +19,35 @@ const TabBar = (props) => {
 
   pathname = pathname === '/' ? '/home' : pathname
 
-  const { formatMessage } = useIntl();
-
-  // const checkPaneExist = (path) => {
-  //   let isExist = false;
-  //   for (let i = 0; i < tabPanes.length; i++) {
-  //     if (tabPanes[i].key === path) {
-  //       isExist = true;
-  //       break;
-  //     }
-  //   }
-  //   if (!isExist) {
-  //     const p = allPath.find((item) => {
-  //       return item.path === path;
-  //     });
-  //     if (p) {
-  //       const newPanes = tabPanes.slice();
-  //       newPanes.push({
-  //         title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
-  //         key: path,
-  //       });
-  //       props.dispatch({
-  //         type: 'global/updateState',
-  //         payload: {
-  //           tabPanes: newPanes
-  //         }
-  //       })
-  //       // setPanes(newPanes);
-  //     }
-  //   }
-  // };
-
   // 初始化
   useEffect(() => {
-    // props.dispatch({
-    //   type: 'global/checkPaneExist',
-    //   payload: {
-    //     path: pathname
-    //   }
-    // })
+    
   }, []);
 
-  const onChange = (activekey, fromMenu) => {
+  const onChange = (activekey) => {
+    console.log(activekey)
     if (activekey !== tabActiveKey) {
-      // setTimeout(() => {
       props.dispatch({
         type: 'global/updateState',
         payload: {
-          tabActiveKey: activekey
+          tabActiveKey: activekey,
+          menuSelectedKeys: [activekey]
         }
       })
-      // setActiveKey(activekey);
-      // }, 200)
-      if (!fromMenu) {
-        props.dispatch({
-          type: 'global/updateState',
-          payload: {
-            menuSelectedKeys: [activekey]
+
+      // props.checkMenuOpen(activekey)
+      // 如果是动态路由跳转过渡页
+      const match = pathToRegexp('/dict/type/data/:dictId').exec(activekey);
+      if (match) {
+        const path = match[0];
+        history.push({
+          pathname: '/transition',
+          query: {
+            path: path,
           }
         })
-        // props.setSelectedKeys([activekey])
-        props.checkMenuOpen(activekey)
-        history.push(activekey);
       } else {
-        checkPaneExist(activekey);
+        history.push(activekey);
       }
     }
   };
@@ -89,20 +55,21 @@ const TabBar = (props) => {
   const remove = (targetKey) => {
     let lastActiveKey = '/home';
     let lastIndex;
+    console.log(tabActiveKey)
     tabPanes.forEach((pane, i) => {
-      if (pane.key === targetKey) {
+      if (pane.path === targetKey) {
         lastIndex = i - 1;
       }
     });
-    const lastPanes = tabPanes.filter((pane) => pane.key !== targetKey);
+    const lastPanes = tabPanes.filter((pane) => pane.path !== targetKey);
     if (lastPanes.length && tabActiveKey === targetKey) {
       if (lastIndex >= 0) {
-        lastActiveKey = lastPanes[lastIndex].key;
+        lastActiveKey = lastPanes[lastIndex].path;
       } else {
-        lastActiveKey = lastPanes[0].key;
+        lastActiveKey = lastPanes[0].path;
       }
     } else {
-      lastActiveKey = lastPanes[lastPanes.length - 1].key;
+      lastActiveKey = lastPanes[lastPanes.length - 1].path;
     }
     // setTimeout(() => {
     props.dispatch({
@@ -113,18 +80,21 @@ const TabBar = (props) => {
         tabPanes: lastPanes
       }
     })
-    // setActiveKey(lastActiveKey);
-    // }, 200)
-    // props.dispatch({
-    //   type: 'global/updateState',
-    //   payload: {
-    //     tabPanes: lastPanes
-    //   }
-    // })
-    // setPanes(lastPanes);
-    // props.setSelectedKeys([lastActiveKey])
-    props.checkMenuOpen(lastActiveKey)
-    history.push(lastActiveKey);
+
+    // props.checkMenuOpen(lastActiveKey)
+    // 如果是动态路由跳转过渡页
+    const match = pathToRegexp('/dict/type/data/:dictId').exec(lastActiveKey);
+    if (match) {
+      const path = match[0];
+      history.push({
+        pathname: '/transition',
+        query: {
+          path: path,
+        }
+      })
+    } else {
+      history.push(lastActiveKey);
+    }
   };
 
   const onEdit = (targetKey, action) => {
@@ -136,14 +106,25 @@ const TabBar = (props) => {
   // 刷新
   const refreshTab = (e) => {
     e.preventDefault();
+
     dropByCacheKey(tabActiveKey);
-    if (location.query) {
+
+    // history.push('/system/role');
+    if (Object.keys(location.query).length !== 0) {
       history.push({
-        pathname: tabActiveKey,
-        query: location.query
+        pathname: '/transition',
+        query: {
+          path: tabActiveKey,
+          ...location.query
+        }
       });
     } else {
-      history.push(tabActiveKey);
+      history.push({
+        pathname: '/transition',
+        query: {
+          path: tabActiveKey
+        }
+      });
     }
   };
 

@@ -152,6 +152,16 @@ export default [
               }
             ]
           },
+          // 字典数据详情页
+          {
+            path: '/dict/type/data/:dictId(\\d+)',
+            component: './system/dictdata/index',
+          },
+          // 过渡页
+          {
+            path: '/transition',
+            component: './Transition'
+          },
           // 图表
           {
             path: '/charts',

@@ -161,6 +161,8 @@ const TableList = () => {
     if (res.code === 200) {
       SageMessage.success('删除成功')
       tableRef.current.reloadTable()
+      setSingle(true)
+      setMultiple(true)
     }
   }
 
@@ -322,11 +324,13 @@ const TableList = () => {
       icon: <ExclamationCircleOutlined />,
       // content: 'Some descriptions',
       onOk: async () => {
-        
+
         const res = await removeUser({ userId: userIds.join(',') })
         if (res.code === 200) {
           SageMessage.success('删除成功')
           tableRef.current.reloadTable()
+          setSingle(true)
+          setMultiple(true)
         }
       },
       onCancel: () => {
@@ -376,8 +380,8 @@ const TableList = () => {
           <AuthButton auth="system:user:add" type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</AuthButton>
           <AuthButton auth="system:user:edit" type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={single} style={{ marginLeft: '8px' }}>编辑</AuthButton>
           <AuthButton auth="system:user:remove" type="danger" icon={<DeleteOutlined />} onClick={(e) => onDelete(e)} disabled={multiple} style={{ marginLeft: '8px' }}>删除</AuthButton>
-          <AuthButton auth="system:user:import" icon={<VerticalAlignTopOutlined />} onClick={(e) => onImport(e)} style={{marginLeft: '8px'}}>导入</AuthButton>
-          <AuthButton auth="system:user:export" type="warning" icon={<VerticalAlignBottomOutlined />} onClick={(e) => onExport(e)} style={{marginLeft: '8px'}}>导出</AuthButton>
+          <AuthButton auth="system:user:import" icon={<VerticalAlignTopOutlined />} onClick={(e) => onImport(e)} style={{ marginLeft: '8px' }}>导入</AuthButton>
+          <AuthButton auth="system:user:export" type="warning" icon={<VerticalAlignBottomOutlined />} onClick={(e) => onExport(e)} style={{ marginLeft: '8px' }}>导出</AuthButton>
         </>
       )
     },
@@ -495,7 +499,7 @@ const TableList = () => {
         }
       </SageModal>
 
-      <ImportModal 
+      <ImportModal
         ref={importModalRef}
         importSuccess={importSuccess}
         request={(params) => importUser(params)}

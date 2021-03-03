@@ -62,6 +62,11 @@ const Model = {
             errorMessage: response.msg
           },
         });
+
+        yield put({
+          type: 'getCodeImg',
+          payload: {}
+        });
       }
     },
 
@@ -83,7 +88,7 @@ const Model = {
           // });
           window.location.href = '/user/login'
         }
-      }
+      } 
     },
     *getCodeImg({ payload }, { call, put }) {
       const response = yield call(getCodeImg, payload);

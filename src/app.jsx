@@ -4,7 +4,7 @@ import { deepClone } from './utils/utils';
 let authRoutes = [];
 
 export function patchRoutes({ routes }) {
-  console.log('添加404路由')
+  // console.log('添加404路由')
   
   for (let i = 0; i < routes.length; i++) {
     if (routes[i].path === '/') {
@@ -66,10 +66,13 @@ function filterRouterPath (list, parentPath) {
 
 // 请求动态路由
 export async function render (oldRender)  {
-  const res = await getRouters()
+  let res = null
+  if (localStorage.token) {
+    res = await getRouters()
+  }
   // console.log('请求了')
   window.oldRender = () => {
-    if (res.code === 200) {
+    if (res && res.code === 200) {
       authRoutes = res.data;
       filterRouterPath(authRoutes)
       addComponent(authRoutes)
