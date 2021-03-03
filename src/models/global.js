@@ -323,19 +323,6 @@ const GlobalModel = {
         if (typeof window.ga !== 'undefined') {
           window.ga('send', 'pageview', pathname + search);
         }
-
-        // 监听字典数据详情页
-        // const match = pathToRegexp('/dict/type/data/:dictId').exec(pathname);
-        // if (match) {
-        //   const path = match[0];
-				// 	// dispatch action with userId
-        //   history.push({
-        //     pathname: '/transition',
-        //     query: {
-        //       path: path,
-        //     }
-        //   })
-        // }
       });
     },
   },
