@@ -25,7 +25,7 @@ const TabBar = (props) => {
   }, []);
 
   const onChange = (activekey) => {
-    console.log(activekey)
+    // console.log(activekey)
     if (activekey !== tabActiveKey) {
       props.dispatch({
         type: 'global/updateState',

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import KeepAlive from 'react-activation'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Switch, Modal } from 'antd'
 // import { history, connect } from 'umi'
@@ -336,7 +337,6 @@ const TableList = (props) => {
 
   return (
     <PageHeaderWrapper>
-
       {
         dictDetail.dictType ?
           <SageTable
@@ -348,7 +348,8 @@ const TableList = (props) => {
               params.dictType = dictDetail.dictType
               return queryDictData(params)
             }}
-          /> : null
+          />
+          : null
       }
 
 

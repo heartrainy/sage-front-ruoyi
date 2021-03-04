@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import KeepAlive from 'react-activation'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Switch, Modal } from 'antd'
 import { SageLayoutLR, SageTable, SageModal, SageForm, SageButton, SageMessage, ActionSet } from '@/components/Common'
@@ -167,10 +168,22 @@ const TableList = () => {
       const { menus, checkedKeys } = res
       filterMenuTree(menus)
       menutreeRef.current.setMenuTree(menus)
-      menutreeRef.current.setCheckedKeys(checkedKeys)
+      const lastCheckedKeys = []
+      const getCheckedKey = (arr) => {
+        arr.forEach(item => {
+          lastCheckedKeys.push(item.id)
+          if (item.children && item.children.length !== 0) {
+            item.children = item.children.slice()
+            getCheckedKey(item.children)
+          }
+        })
+      }
+      getCheckedKey(menus)
+
+      menutreeRef.current.setCheckedKeys(lastCheckedKeys)
       setRole({
         ...record,
-        menuIds: checkedKeys.slice()
+        menuIds: lastCheckedKeys.slice()
       })
     }
   }
@@ -384,7 +397,12 @@ const TableList = () => {
         break;
       case 'update':
         formData.roleId = detail.roleId
+        // const checkedKeys = menutreeRef.current.getCheckedKeys()
+        // const halfCheckedKeys = menutreeRef.current.getHalfCheckedKeys()
+        // console.log(checkedKeys)
+        // console.log(halfCheckedKeys)
         formData.menuIds = role.menuIds
+        formData.menuCheckStrictly = true       // 默认父子关联
         res = await updateRole(formData)
         break
       default:
@@ -424,7 +442,6 @@ const TableList = () => {
 
   return (
     <PageHeaderWrapper>
-
       <SageLayoutLR
         left={
           <SageTable
@@ -434,6 +451,7 @@ const TableList = () => {
             {...tableProps}
             request={(params) => queryRole(params)}
           />
+
         }
         rightWidth={350}
         right={
@@ -447,7 +465,6 @@ const TableList = () => {
 
         }
       />
-
       <SageModal
         ref={modalRef}
         onOk={onOk}

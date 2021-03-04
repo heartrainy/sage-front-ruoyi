@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import KeepAlive from 'react-activation'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Switch, Modal } from 'antd'
 import { SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/components/Common'
@@ -39,7 +40,7 @@ const DeptList = () => {
 
   // 状态Options
   const requestStatusOptions = async () => {
-    const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+    const res = await getEnumDropDownList({ type: 'sys_normal_disable' })
     if (res.code === 200) {
       setStatusOptions(res.data)
     }
@@ -100,7 +101,7 @@ const DeptList = () => {
   // 新增
   const handleAdd = (event, record) => {
     event.stopPropagation()
-    
+
     onAdd(record.deptId)
   }
 
@@ -122,7 +123,7 @@ const DeptList = () => {
     if (res.code === 200) {
       const { data } = res
       setDetail(data)
-  
+
       updateFormRef.current.setFieldsValue({
         parentId: data.parentId,
         deptName: data.deptName,
@@ -133,7 +134,7 @@ const DeptList = () => {
         status: data.status
       })
     }
-    
+
   }
 
   // 删除
@@ -317,7 +318,7 @@ const DeptList = () => {
         <>
           <AuthButton auth="system:dept:add" type="primary" icon={<PlusOutlined />} onClick={() => onAdd()}>新增</AuthButton>
           {/* <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={editable} style={{marginLeft: '8px'}}>编辑</SageButton> */}
-          <AuthButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{marginLeft: '8px'}}>全部展开/折叠</AuthButton>
+          <AuthButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{ marginLeft: '8px' }}>全部展开/折叠</AuthButton>
         </>
       )
     },
@@ -364,7 +365,6 @@ const DeptList = () => {
 
   return (
     <PageHeaderWrapper>
-
       <SageTable
         ref={tableRef}
         {...tableSearchFormProps}
@@ -384,26 +384,25 @@ const DeptList = () => {
       >
         {
           status === 'add' ?
-          <CreateForm
-            ref={createFormRef}
-            onFinish={onFinish}
-            parentId={parentId}
-            parentIdOptions={deptList}
-            statusOptions={statusOptions}
-          /> : null
+            <CreateForm
+              ref={createFormRef}
+              onFinish={onFinish}
+              parentId={parentId}
+              parentIdOptions={deptList}
+              statusOptions={statusOptions}
+            /> : null
         }
         {
           status === 'update' ?
-          <UpdateForm
-            ref={updateFormRef}
-            detail={detail}
-            onFinish={onFinish}
-            parentIdOptions={parentIdOptions}
-            statusOptions={statusOptions}
-          /> : null
+            <UpdateForm
+              ref={updateFormRef}
+              detail={detail}
+              onFinish={onFinish}
+              parentIdOptions={parentIdOptions}
+              statusOptions={statusOptions}
+            /> : null
         }
       </SageModal>
-
     </PageHeaderWrapper>
   )
 }

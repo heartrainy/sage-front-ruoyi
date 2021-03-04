@@ -6,6 +6,7 @@
 import ProLayout, { DefaultFooter } from '@ant-design/pro-layout';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useIntl, connect, history, FormattedMessage, KeepAliveLayout } from 'umi';
+import { AliveScope } from 'react-activation'
 import { createFromIconfontCN, GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Result, Button, Menu } from 'antd';
 import Authorized from '@/utils/Authorized';
@@ -210,7 +211,6 @@ const BasicLayout = (props) => {
   }
 
   return (
-
     <div className={`sage-app-wrapper ${collapsed ? 'hideSidebar' : ''}`}>
       <div className="sage-sidebar-container">
         <div className="sidebar-logo-container">
@@ -257,6 +257,7 @@ const BasicLayout = (props) => {
         <div className="sage-app-main">
           <div className="sage-dashboard-container">
             <KeepAliveLayout {...props}>{children}</KeepAliveLayout>
+            {/* {children} */}
           </div>
           <GlobalFooter />
         </div>

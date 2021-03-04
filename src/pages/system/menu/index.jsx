@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import KeepAlive from 'react-activation'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { connect } from 'umi'
 import { SageTable, SageModal, SageButton, SageMessage, ActionSet } from '@/components/Common'
@@ -41,7 +42,7 @@ const MenuList = (props) => {
 
   // 是否可见Options
   const requestVisibleOptions = async () => {
-    const res = await getEnumDropDownList({type: 'sys_show_hide'})
+    const res = await getEnumDropDownList({ type: 'sys_show_hide' })
     if (res.code === 200) {
       setVisibleOptions(res.data)
     }
@@ -49,7 +50,7 @@ const MenuList = (props) => {
 
   // 状态Options
   const requestStatusOptions = async () => {
-    const res = await getEnumDropDownList({type: 'sys_normal_disable'})
+    const res = await getEnumDropDownList({ type: 'sys_normal_disable' })
     if (res.code === 200) {
       setStatusOptions(res.data)
     }
@@ -111,7 +112,7 @@ const MenuList = (props) => {
   // 新增
   const handleAdd = (event, record) => {
     event.stopPropagation()
-    
+
     console.log(record.menuId)
     onAdd(record.menuId)
   }
@@ -265,7 +266,7 @@ const MenuList = (props) => {
     } else {
       setParentId('0')
     }
-    
+
     if (modalRef.current) {
       setStatus('add')
       modalRef.current.setTitle('新增')
@@ -308,7 +309,7 @@ const MenuList = (props) => {
         <>
           <AuthButton auth="system:menu:add" type="primary" icon={<PlusOutlined />} onClick={() => onAdd()}>新增</AuthButton>
           {/* <SageButton type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={editable} style={{marginLeft: '8px'}}>编辑</SageButton> */}
-          <AuthButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{marginLeft: '8px'}}>全部展开/折叠</AuthButton>
+          <AuthButton type="waring" icon={<SwapOutlined />} onClick={(e) => onExpand(e)} style={{ marginLeft: '8px' }}>全部展开/折叠</AuthButton>
         </>
       )
     },
@@ -358,7 +359,6 @@ const MenuList = (props) => {
 
   return (
     <PageHeaderWrapper>
-
       <SageTable
         ref={tableRef}
         {...tableSearchFormProps}
@@ -378,27 +378,28 @@ const MenuList = (props) => {
       >
         {
           status === 'add' ?
-          <CreateForm
-            ref={createFormRef}
-            onFinish={onFinish}
-            parentId={parentId}
-            visibleOptions={visibleOptions}
-            statusOptions={statusOptions}
-          /> : null
+            <CreateForm
+              ref={createFormRef}
+              onFinish={onFinish}
+              parentId={parentId}
+              visibleOptions={visibleOptions}
+              statusOptions={statusOptions}
+            /> : null
         }
         {
           status === 'update' ?
-          <UpdateForm
-            ref={updateFormRef}
-            detail={detail}
-            onFinish={onFinish}
-            visibleOptions={visibleOptions}
-            statusOptions={statusOptions}
-          /> : null
+            <UpdateForm
+              ref={updateFormRef}
+              detail={detail}
+              onFinish={onFinish}
+              visibleOptions={visibleOptions}
+              statusOptions={statusOptions}
+            /> : null
         }
       </SageModal>
 
     </PageHeaderWrapper>
+
   )
 }
 

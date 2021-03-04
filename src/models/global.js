@@ -259,7 +259,7 @@ const GlobalModel = {
         }
       }
 
-      console.log(isExist ? '存在' : '不存在')
+      // console.log(isExist ? '存在' : '不存在')
 
       if (!isExist) {
         const addTab = findAddRouter(path, state.filterRouters)

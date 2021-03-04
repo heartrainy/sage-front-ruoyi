@@ -3183,6 +3183,17 @@
     react-dom "^16.13.1"
     react-router-config "5.1.1"
 
+"@umijs/renderer-react@^3.2.9":
+  version "3.3.9"
+  resolved "https://registry.npmjs.org/@umijs/renderer-react/-/renderer-react-3.3.9.tgz#d562c239c3d40359bd2e12f70c39a7b4a855c334"
+  integrity sha512-2+UDLcm9oiuMOC/en4MM6HQRglrKsJzmz1ExgeVIeItHqREwTB92GcRhZjG2jS1+S8h7+CTkiabJoIa5DKGzcw==
+  dependencies:
+    "@types/react" "^16.9.43"
+    "@types/react-dom" "^16.9.8"
+    "@types/react-router-config" "^5.0.1"
+    "@umijs/runtime" "3.3.9"
+    react-router-config "5.1.1"
+
 "@umijs/route-utils@^1.0.5", "@umijs/route-utils@^1.0.7":
   version "1.0.34"
   resolved "https://registry.npm.taobao.org/@umijs/route-utils/download/@umijs/route-utils-1.0.34.tgz#663d020669217dd7e8431a1b9ce9abea5fbbb6b8"
@@ -3197,6 +3208,18 @@
   version "3.3.4"
   resolved "https://registry.npm.taobao.org/@umijs/runtime/download/@umijs/runtime-3.3.4.tgz#78df707c63cb402917b2980d98f1be59ce007257"
   integrity sha1-eN9wfGPLQCkXspgNmPG+Wc4Aclc=
+  dependencies:
+    "@types/react-router" "5.1.8"
+    "@types/react-router-dom" "5.1.5"
+    history-with-query "4.10.4"
+    react-router "5.2.0"
+    react-router-dom "5.2.0"
+    use-subscription "1.4.1"
+
+"@umijs/runtime@3.3.9":
+  version "3.3.9"
+  resolved "https://registry.npmjs.org/@umijs/runtime/-/runtime-3.3.9.tgz#0361a0b5f49611e662aa919cac3446d43f574f89"
+  integrity sha512-eRBVDLQmkHxUsquxmDiSQnbHik9ds7nixSLYJNEhNAf3zm8sVGzPmDBQ0bxe8IfpYUmfXzW/1+B/+VezOWPzuQ==
   dependencies:
     "@types/react-router" "5.1.8"
     "@types/react-router-dom" "5.1.5"
@@ -14056,16 +14079,16 @@ rc-virtual-list@^3.0.1, rc-virtual-list@^3.2.0:
     rc-resize-observer "^1.0.0"
     rc-util "^5.0.7"
 
-react-activation@^0.5.0:
-  version "0.5.7"
-  resolved "https://registry.npm.taobao.org/react-activation/download/react-activation-0.5.7.tgz#4bdffebc8ae1170df926e21c7e110ea1ce03d2bd"
-  integrity sha1-S9/+vIrhFw35JuIcfhEOoc4D0r0=
+react-activation@^0.8.0, react-activation@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.npmjs.org/react-activation/-/react-activation-0.8.1.tgz#561c4caf20e0b5d5211b52bcbce6ff3b7d8610f1"
+  integrity sha512-ylAUqued0D17PMhTNziGyWl1l6LkgcGJ68yjsy4s613qCEWs72ci6eNqQKIKR/7oV/w/3ZKBSHeSD6iMVxKwiw==
   dependencies:
-    core-js "^3.6.5"
     create-react-context "^0.3.0"
     hoist-non-react-statics "^3.3.0"
     jsx-ast-utils "^2.2.1"
-    react-node-key "^0.1.8"
+    react-node-key "^0.2.0"
+    szfe-tools "^0.0.0-beta.7"
 
 react-beautiful-dnd@^13.0.0:
   version "13.0.0"
@@ -14219,12 +14242,11 @@ react-native-swipeout@^2.2.2:
     prop-types "^15.5.10"
     react-tween-state "^0.1.5"
 
-react-node-key@^0.1.8:
-  version "0.1.8"
-  resolved "https://registry.npm.taobao.org/react-node-key/download/react-node-key-0.1.8.tgz#d7c5f9d44bf1240c6ead154667c2ac8b1cc50dd0"
-  integrity sha1-18X51EvxJAxurRVGZ8KsixzFDdA=
+react-node-key@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.npmjs.org/react-node-key/-/react-node-key-0.2.0.tgz#c937390208de87a0361bce87b507ccef35fb0f35"
+  integrity sha512-fC5ZVz3TwhSY0o1hw08R/V/Ze/exfhaeDllRucuvEH2Xj1qT4Y4IoSr93BftcVJHJFt3fmmTCV/mGk+LX5x20w==
   dependencies:
-    core-js "^3.6.5"
     jsx-ast-utils "^2.2.1"
     szfe-tools "^0.0.0-beta.7"
 
@@ -14254,7 +14276,7 @@ react-responsive@^8.0.1:
     prop-types "^15.6.1"
     shallow-equal "^1.1.0"
 
-react-router-config@5.1.1:
+react-router-config@5.1.1, react-router-config@^5.1.1:
   version "5.1.1"
   resolved "https://registry.npm.taobao.org/react-router-config/download/react-router-config-5.1.1.tgz#0f4263d1a80c6b2dc7b9c1902c9526478194a988"
   integrity sha1-D0Jj0agMay3HucGQLJUmR4GUqYg=
@@ -16957,6 +16979,15 @@ umi-plugin-antd-icon-config@^2.0.0:
   integrity sha1-Q/osbjMuCDR2RIOEsX6TTxlmVqA=
   dependencies:
     "@ant-design/icons" "^4.0.0"
+
+umi-plugin-keep-alive@^0.0.1-beta.22:
+  version "0.0.1-beta.22"
+  resolved "https://registry.npmjs.org/umi-plugin-keep-alive/-/umi-plugin-keep-alive-0.0.1-beta.22.tgz#3d8a038f080cf267c6a063509da8bee4bc01611f"
+  integrity sha512-gYyQ2Wc3LnP1Zp38rYwIMVwzL2L+EtoKUMvWf4kcaST6JpFGQCQ+fXpbm+4lMgvMXnKSb/VlFevXZWiELWIu+Q==
+  dependencies:
+    "@umijs/renderer-react" "^3.2.9"
+    react-activation "^0.8.0"
+    react-router-config "^5.1.1"
 
 umi-plugin-pro-block@^2.0.1:
   version "2.0.3"

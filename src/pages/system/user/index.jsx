@@ -440,36 +440,34 @@ const TableList = () => {
 
   return (
     <PageHeaderWrapper>
-
-      <SageLayoutLR
-        leftWidth={250}
-        left={
-          <div style={{ padding: '0 12px 12px 0', height: '100%' }}>
-            <Card
-              title="组织部门"
-              extra={
-                <RedoOutlined style={{ cursor: 'pointer' }} onClick={onRefreshDept} />
-              }
-              size="small"
-              style={{ height: '100%' }}>
-              <DeptTree
-                ref={depttreeRef}
-                onSelect={onSelectDept}
-              />
-            </Card>
-          </div>
-        }
-        right={
-          <SageTable
-            ref={tableRef}
-            {...tableSearchFormProps}
-            {...tableToolProps}
-            {...tableProps}
-            request={(params) => queryUser(params)}
-          />
-        }
-      />
-
+        <SageLayoutLR
+          leftWidth={250}
+          left={
+            <div style={{ padding: '0 12px 12px 0', height: '100%' }}>
+              <Card
+                title="组织部门"
+                extra={
+                  <RedoOutlined style={{ cursor: 'pointer' }} onClick={onRefreshDept} />
+                }
+                size="small"
+                style={{ height: '100%' }}>
+                <DeptTree
+                  ref={depttreeRef}
+                  onSelect={onSelectDept}
+                />
+              </Card>
+            </div>
+          }
+          right={
+            <SageTable
+              ref={tableRef}
+              {...tableSearchFormProps}
+              {...tableToolProps}
+              {...tableProps}
+              request={(params) => queryUser(params)}
+            />
+          }
+        />
       <SageModal
         ref={modalRef}
         onOk={onOk}
