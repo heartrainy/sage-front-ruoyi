@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
 import { mobile, email, idCode } from '@/utils/verify'
-import { getTreeSelect } from '@/pages/dept/service'
+import { getTreeSelect } from '@/pages/system/dept/service'
 import { getPostsAndRoles } from '../service'
 
 // 遍历所有子节点数组改变结构

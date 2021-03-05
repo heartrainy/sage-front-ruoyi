@@ -1,15 +1,22 @@
 import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
-import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
+import { Form } from 'antd'
+import BraftEditor from 'braft-editor'
 import { SageForm } from '@/components/Common'
+import 'braft-editor/dist/index.css'
 
 const UpdateForm = (props, ref) => {
 
-  const { detail, statusOptions } = props
+  const [editorState, setEditorState] = useState(() => {
+    BraftEditor.createEditorState(null)
+  })
+
+  const { detail, noticeStatusOptions, noticeTypeOptions } = props
 
   const formRef = useRef()
 
   const onFinish = (values) => {
     if (props.onFinish) {
+      values.noticeContent = editorState.toHTML()
       props.onFinish(values)
     }
   }
@@ -18,50 +25,52 @@ const UpdateForm = (props, ref) => {
     console.log(values)
   }
 
+  useEffect(() => {
+    const newEditorState = BraftEditor.createEditorState(detail.noticeContent)
+    setEditorState(newEditorState)
+  }, [detail.noticeContent])
+
+  const handleChange = (editorState) => {
+    setEditorState(editorState)
+  }
+
   // 表单字段设置
   const formFields = [
     {
-      name: 'roleName',
-      label: '角色名',
+      name: 'noticeTitle',
+      label: '公告标题',
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入角色名',
+        placeholder: '请输入公告标题',
       }
     },
     {
-      name: 'roleKey',
-      label: '权限字符',
-      type: 'input',
-      rules: [{ required: true }],
-      props: {
-        placeholder: '请输入权限字符',
-      }
-    },
-    {
-      name: 'roleSort',
-      label: '角色排序',
-      type: 'input',
-      rules: [{ required: true }],
-      props: {
-        placeholder: '请输入角色排序',
-      }
-    },
-    {
-      name: 'status',
-      label: '部门状态',
-      type: 'radio',
-      options: statusOptions,
+      name: 'noticeType',
+      label: '公告类型',
+      type: 'select',
+      options: noticeTypeOptions,
       valueName: 'dictValue',
       textName: 'dictLabel'
     },
     {
-      name: 'remark',
-      label: '备注',
-      type: 'textarea',
-      props: {
-        placeholder: '请输入内容',
-      }
+      name: 'status',
+      label: '状态',
+      type: 'radio',
+      options: noticeStatusOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel'
+    },
+    {
+      name: 'noticeContent',
+      type: 'custom',
+      render: (
+        <Form.Item key="noticeContent" label="内容">
+          <div className="editor-wrapper">
+            <BraftEditor value={editorState} onChange={handleChange} contentStyle={{height: 400}} />
+          </div>
+        </Form.Item>   
+      )
     }
   ]
 

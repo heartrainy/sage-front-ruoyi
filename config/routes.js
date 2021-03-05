@@ -40,118 +40,8 @@ export default [
           },
           // 系统管理
           // {
-          //   path: '/system',
-          //   name: 'system',
-          //   routes: [
-          //     {
-          //       path: '/system/role',
-          //       name: 'role',
-          //       component: './role',
-          //     },
-          //     {
-          //       path: '/system/menu',
-          //       name: 'menu',
-          //       component: './menu',
-          //     },
-          //     {
-          //       path: '/system/dept',
-          //       name: 'dept',
-          //       component: './dept',
-          //     },
-          //     {
-          //       path: '/system/user',
-          //       name: 'user',
-          //       component: './user/manage',
-          //     },
-          //     {
-          //       path: '/system/center',
-          //       name: 'center',
-          //       component: './user/center',
-          //     },
-          //   ],
+
           // },
-          // 系统监控
-          {
-            path: '/monitor',
-            name: 'monitor',
-            routes: [
-              {
-                path: '/monitor/online',
-                name: 'online',
-                component: './role',
-              },
-              {
-                path: '/monitor/job',
-                name: 'job',
-                component: './menu',
-              },
-              {
-                path: '/monitor/druid',
-                name: 'druid',
-                component: './dept',
-              },
-              {
-                path: '/monitor/server',
-                name: 'server',
-                component: './user/manage',
-              },
-              {
-                path: '/monitor/cache',
-                name: 'cache',
-                component: './user/center',
-              },
-            ],
-          },
-          // demo例子
-          {
-            path: '/demo',
-            name: 'demo',
-            icon: 'setting',
-            routes: [
-              {
-                path: '/demo/crud',
-                name: 'crud',
-                icon: 'SolutionOutlined',
-                component: './demo/crud',
-              },
-              {
-                path: '/demo/tabcrud',
-                name: 'tabcrud',
-                icon: 'SolutionOutlined',
-                component: './demo/tabcrud',
-              },
-              {
-                path: '/demo/tabcrud/add',
-                name: 'crudadd',
-                component: './demo/tabcrud/components/CreateForm',
-              },
-              {
-                path: '/demo/tabcrud/edit',
-                name: 'crudedit',
-                component: './demo/tabcrud/components/UpdateForm',
-              },
-              {
-                path: '/demo/moretable',
-                name: 'moretable',
-                icon: 'SolutionOutlined',
-                component: './demo/moretable',
-              },
-            ],
-          },
-          // 添加商户
-          {
-            path: '/tenantsys',
-            name: 'tenantsys',
-            icon: 'setting',
-            routes: [
-              {
-                path: '/tenantsys/tenant',
-                name: 'tenant',
-                icon: 'SolutionOutlined',
-                component: './tenant/index',
-              }
-            ]
-          },
           // 字典数据详情页
           {
             path: '/dict/type/data/:dictId(\\d+)',
@@ -189,6 +79,42 @@ export default [
                 component: './editor/braft/index',
               }
             ]
+          },
+          // demo例子
+          {
+            path: '/demo',
+            name: 'demo',
+            icon: 'setting',
+            routes: [
+              {
+                path: '/demo/crud',
+                name: 'crud',
+                icon: 'SolutionOutlined',
+                component: './demo/crud',
+              },
+              {
+                path: '/demo/tabcrud',
+                name: 'tabcrud',
+                icon: 'SolutionOutlined',
+                component: './demo/tabcrud',
+              },
+              {
+                path: '/demo/tabcrud/add',
+                name: 'crudadd',
+                component: './demo/tabcrud/components/CreateForm',
+              },
+              {
+                path: '/demo/tabcrud/edit',
+                name: 'crudedit',
+                component: './demo/tabcrud/components/UpdateForm',
+              },
+              {
+                path: '/demo/moretable',
+                name: 'moretable',
+                icon: 'SolutionOutlined',
+                component: './demo/moretable',
+              },
+            ],
           },
           // -----
           {

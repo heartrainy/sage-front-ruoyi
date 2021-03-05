@@ -4,7 +4,7 @@ import { Card, Tabs } from 'antd'
 import { connect } from 'umi'
 import { SageLayoutLR, SageForm, SageMessage } from '@/components/Common'
 import { mobile, email } from '@/utils/verify'
-import { updateUser, resetPwd } from '@/pages/user/manage/service'
+import { updateUser, resetPwd } from '@/pages/system/user/service'
 
 import style from './style.less'
 

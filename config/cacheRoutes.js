@@ -5,6 +5,8 @@ const routes = [
   '/system/user',
   '/system/post',
   '/system/dict',
+  '/system/config',
+  '/system/notice',
 ]
 
 export default {

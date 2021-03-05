@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useImperativeHandle } from 'react'
 import { SageTree } from '@/components/Common'
-import { getTreeSelect } from '@/pages/dept/service'
+import { getTreeSelect } from '@/pages/system/dept/service'
 
 // 遍历所有子节点数组改变结构
 function loopTree(arr) {

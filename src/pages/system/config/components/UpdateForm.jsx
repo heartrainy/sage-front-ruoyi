@@ -1,19 +1,12 @@
 import React, { useState, useRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input, InputNumber, Select, AutoComplete } from 'antd'
 import { SageForm } from '@/components/Common'
-import { getEnumDropDownList } from '@/services/enum'
-
-const { Option } = Select
 
 const UpdateForm = (props, ref) => {
 
-  const { detail } = props
+  const { detail, configTypeOptions } = props
 
   const formRef = useRef()
-
-  useEffect(() => {
-
-  }, [])
 
   const onFinish = (values) => {
     if (props.onFinish) {
@@ -21,42 +14,53 @@ const UpdateForm = (props, ref) => {
     }
   }
 
+  const onFinishFailed = ({ values }) => {
+    console.log(values)
+  }
+
   // 表单字段设置
   const formFields = [
     {
-      name: 'field1',
-      label: '商户logo',
+      name: 'configName',
+      label: '参数名称',
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入参数名称',
       }
     },
     {
-      name: 'field2',
-      label: '商户名称',
+      name: 'configKey',
+      label: '参数键名',
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入参数键名',
       }
     },
     {
-      name: 'field3',
-      label: '商户简称',
+      name: 'configValue',
+      label: '参数键值',
       type: 'input',
       rules: [{ required: true }],
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入参数键值',
       }
     },
     {
-      name: 'field4',
-      label: '商户分类',
-      type: 'input',
-      rules: [{ required: true }],
+      name: 'configType',
+      label: '系统内置',
+      type: 'radio',
+      options: configTypeOptions,
+      valueName: 'dictValue',
+      textName: 'dictLabel'
+    },
+    {
+      name: 'remark',
+      label: '备注',
+      type: 'textarea',
       props: {
-        placeholder: '请输入'
+        placeholder: '请输入内容',
       }
     }
   ]
@@ -74,8 +78,8 @@ const UpdateForm = (props, ref) => {
     <SageForm
       ref={formRef}
       formFields={formFields}
-      // colNum={2}
       onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
     />
   )
 }
