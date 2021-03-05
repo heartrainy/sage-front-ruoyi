@@ -14,6 +14,7 @@ const TabBar = (props) => {
     filterRouters,
     tabActiveKey,
     tabPanes,
+    menuOpenKeys,
     allPath
   } = props;
 
@@ -24,14 +25,43 @@ const TabBar = (props) => {
     
   }, []);
 
+  // 获取菜单展开Keys
+  const getMenuOpen = (key) => {
+    let newMenuOpenKeys = []
+    const loopMenuOpen = (list) => {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].path === key) {
+          break
+        }
+        if (list[i].children && key.includes(list[i].path)) {
+          newMenuOpenKeys.push(list[i].path)
+          loopMenuOpen(list[i].children)
+        }
+      }
+    }
+    loopMenuOpen(filterRouters)
+    // 三级菜单跳二级菜单 不收起
+    if (newMenuOpenKeys.length === 1) {
+      if (menuOpenKeys.includes(newMenuOpenKeys[0])) {
+        newMenuOpenKeys = menuOpenKeys.slice()
+      }
+    }
+
+    return newMenuOpenKeys
+  }
+
   const onChange = (activekey) => {
     // console.log(activekey)
     if (activekey !== tabActiveKey) {
+
+      const newMenuOpenKeys = getMenuOpen(activekey)
+
       props.dispatch({
         type: 'global/updateState',
         payload: {
           tabActiveKey: activekey,
-          menuSelectedKeys: [activekey]
+          menuSelectedKeys: [activekey],
+          menuOpenKeys: newMenuOpenKeys
         }
       })
 
@@ -72,11 +102,14 @@ const TabBar = (props) => {
       lastActiveKey = lastPanes[lastPanes.length - 1].path;
     }
     // setTimeout(() => {
+    const newMenuOpenKeys = getMenuOpen(activekey)
+
     props.dispatch({
       type: 'global/updateState',
       payload: {
         tabActiveKey: lastActiveKey,
         menuSelectedKeys: [lastActiveKey],
+        menuOpenKeys: newMenuOpenKeys,
         tabPanes: lastPanes
       }
     })

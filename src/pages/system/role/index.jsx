@@ -342,8 +342,7 @@ const TableList = () => {
       content: '是否确认导出所有角色数据项?',
       onOk: async () => {
         const exportParams = tableRef.current.getSearchParamsValue()
-        console.log(exportParams)
-        const res = await exportRole(exportParams)
+        const res = await exportRole(addDateRange(exportParams, 'createTime'))
         if (res.code === 200) {
           download(res.msg)
         }

@@ -282,7 +282,7 @@ const TableList = (props) => {
       content: '是否确认导出所有类型数据项?',
       onOk: async () => {
         const exportParams = tableRef.current.getSearchParamsValue()
-        const res = await exportDict(exportParams)
+        const res = await exportDict(addDateRange(exportParams, 'createTime'))
         if (res.code === 200) {
           download(res.msg)
         }

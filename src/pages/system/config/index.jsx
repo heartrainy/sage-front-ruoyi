@@ -270,7 +270,7 @@ const TableList = (props) => {
       content: '是否确认导出所有参数数据项?',
       onOk: async () => {
         const exportParams = tableRef.current.getSearchParamsValue()
-        const res = await exportConfig(exportParams)
+        const res = await exportConfig(addDateRange(exportParams, 'createTime'))
         if (res.code === 200) {
           download(res.msg)
         }

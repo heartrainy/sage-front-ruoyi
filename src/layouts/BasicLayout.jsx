@@ -160,32 +160,60 @@ const BasicLayout = (props) => {
   }
 
   const handleOpenChange = (_openKeys) => {
+    let newMenuOpenKeys = []
+    // 添加展开
+    if (_openKeys.length > menuOpenKeys.length) {
+      if (_openKeys[_openKeys.length - 1].includes(_openKeys[0])) {
+        newMenuOpenKeys = _openKeys
+      } else {
+        newMenuOpenKeys = [_openKeys.slice().pop()]
+      }
+    } 
+    // 收起
+    else {
+      // 如果收起子菜单
+      if (_openKeys.length > 0) {
+        let closeAll = true
+        const regex = new RegExp(/\//, 'g')
+        for (let i = 0; i < _openKeys.length; i++) {
+          const result = _openKeys[i].match(regex)
+          console.log(result)
+          if (result.length === 1) {
+            closeAll = false
+          }
+        }
+        if (!closeAll) {
+          newMenuOpenKeys = _openKeys.slice()
+        }
+      }
+    }
+    // console.log(_openKeys)
+    // console.log(newMenuOpenKeys)
     props.dispatch({
       type: 'global/updateState',
       payload: {
-        menuOpenKeys: _openKeys.length > 1 ? [_openKeys.slice().pop()] : _openKeys
+        // menuOpenKeys: _openKeys.length > 1 ? [_openKeys.slice().pop()] : _openKeys
+        menuOpenKeys: newMenuOpenKeys
       }
     })
   }
 
   // 判断菜单展开折叠
   const checkMenuOpen = (key) => {
+    const newMenuOpenKeys = []
     const loopMenuOpen = (list) => {
       for (let i = 0; i < list.length; i++) {
         if (list[i].path === key) {
-          if (list[i].parentPath) {
-            props.dispatch({
-              type: 'global/updateState',
-              payload: {
-                menuOpenKeys: [list[i].parentPath]
-              }
-            })
-            // setOpenKeys([list[i].parentPath])
-          }
-          // setOpenKeys(list[i].parentPath ? [list[i].parentPath] : [])
+          props.dispatch({
+            type: 'global/updateState',
+            payload: {
+              menuOpenKeys: newMenuOpenKeys
+            }
+          })
           break
         }
-        if (list[i].children) {
+        if (list[i].children && key.includes(list[i].path)) {
+          newMenuOpenKeys.push(list[i].path)
           loopMenuOpen(list[i].children)
         }
       }
@@ -250,7 +278,6 @@ const BasicLayout = (props) => {
           </div>
           <TabBar
             currentUser={currentUser}
-            checkMenuOpen={checkMenuOpen}
           />
         </div>
 

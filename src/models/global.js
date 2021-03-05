@@ -232,10 +232,25 @@ const GlobalModel = {
           const newPanes = deepClone(state.tabPanes);
           newPanes.push(addTab);
 
+          // 获取菜单展开Keys
+          const newMenuOpenKeys = []
+          const loopMenuOpen = (list) => {
+            for (let i = 0; i < list.length; i++) {
+              if (list[i].path === pathname) {
+                break
+              }
+              if (list[i].children && pathname.includes(list[i].path)) {
+                newMenuOpenKeys.push(list[i].path)
+                loopMenuOpen(list[i].children)
+              }
+            }
+          }
+          loopMenuOpen(filterRouters)
+
           return { 
             ...state,
             menuSelectedKeys: [pathname],
-            menuOpenKeys: [addTab.parentPath],
+            menuOpenKeys: newMenuOpenKeys,
             tabActiveKey: pathname, 
             tabPanes: newPanes 
           }
@@ -271,7 +286,7 @@ const GlobalModel = {
           return { 
             ...state,
             menuSelectedKeys: [path],
-            menuOpenKeys: [addTab.parentPath],
+            // menuOpenKeys: [addTab.parentPath],
             tabActiveKey: path, 
             tabPanes: newPanes 
           }
