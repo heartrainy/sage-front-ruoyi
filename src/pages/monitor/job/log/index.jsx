@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { history, connect } from 'umi'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card, Switch, Modal } from 'antd'
+import { history, connect } from 'umi'
 import { SageTable, SageModal, SageMessage, ActionSet } from '@/components/Common'
 import AuthButton from '@/components/AuthButton'
-import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined, ExceptionOutlined } from '@ant-design/icons';
-import { queryJob, updateJob, addJob, removeJob, getJobDetail, openOrClose, exportJob, runJob } from './service';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined, SyncOutlined } from '@ant-design/icons';
+import { queryJobLog, removeJobLog, exportJobLog, clean } from './service';
 import { getEnumDropDownList } from '@/services/enum'
-import { download, selectDictLabel } from '@/utils/utils'
-import CreateForm from './components/CreateForm'
-import UpdateForm from './components/UpdateForm'
+import { addDateRange, download, selectDictLabel } from '@/utils/utils'
 import ViewForm from './components/ViewForm'
 
 const { confirm } = Modal
@@ -24,12 +22,12 @@ const TableList = (props) => {
   const [detail, setDetail] = useState(initDetail) // 详情
   const [status, setStatus] = useState('') // 状态 1、add 2、update 3、detail
   const [modalLoading, setModalLoading] = useState(false) // 窗口loading
-  const [jobStatusOptions, setJobStatusOptions] = useState([])  //  任务状态Options
+  const [jobStatusOptions, setJobStatusOptions] = useState([])  //  执行状态Options
   const [jobGroupOptions, setJobGroupOptions] = useState([])  //  任务组名Options
   const [single, setSingle] = useState(true) // 非单个禁用
   const [multiple, setMultiple] = useState(true)  // 非多个禁用
 
-  // 获取任务状态下拉数据
+  // 获取执行状态下拉数据
   const requestJobStatusOptions = async () => {
     const res = await getEnumDropDownList({ type: 'sys_job_status' })
     if (res.code === 200) {
@@ -81,13 +79,22 @@ const TableList = (props) => {
     },
     {
       name: 'status',
-      label: '任务状态',
+      label: '执行状态',
       type: 'select',
       options: jobStatusOptions,
       valueName: 'dictValue',
       textName: 'dictLabel',
       props: {
-        placeholder: '请选择任务状态',
+        placeholder: '请选择执行状态',
+        allowClear: true
+      }
+    },
+    {
+      name: 'createTime',
+      label: '执行时间',
+      type: 'rangepicker',
+      props: {
+        style: { width: '100%' },
         allowClear: true
       }
     }
@@ -99,7 +106,7 @@ const TableList = (props) => {
       const postParams = Object.assign({ pageNum: 1 }, params)
       // 处理查询条件
 
-      tableRef.current.queryTable(postParams)
+      tableRef.current.queryTable(addDateRange(postParams, 'createTime'))
     }
   }
 
@@ -118,48 +125,12 @@ const TableList = (props) => {
 
   // 编辑
   const handleEdit = async (event, record) => {
-    event.stopPropagation()
 
-    setStatus('update')
-    const res = await getJobDetail({ jobId: record.jobId })
-    const { data } = res
-    setDetail(data)
-
-    modalRef.current.setTitle('编辑任务')
-    modalRef.current.setVisible(true)
-    updateFormRef.current.setFieldsValue({
-      jobName: data.jobName,
-      jobGroup: data.jobGroup,
-      invokeTarget: data.invokeTarget,
-      cronExpression: data.cronExpression,
-      misfirePolicy: data.misfirePolicy,
-      concurrent: data.concurrent,
-      status: data.status
-    })
   }
 
   // 删除
   const handleDelete = async (event, record) => {
-    event.stopPropagation()
 
-    const res = await removeJob({ jobId: record.jobId })
-    if (res.code === 200) {
-      SageMessage.success('删除成功')
-      tableRef.current.reloadTable()
-      setSingle(true)
-      setMultiple(true)
-    }
-  }
-
-  // 执行
-  const handleRun = async (event, record) => {
-    event.stopPropagation()
-
-    const res = await runJob({ jobId: record.jobId, jobGroup: record.jobGroup })
-    if (res.code === 200) {
-      SageMessage.success('执行成功')
-      tableRef.current.reloadTable()
-    }
   }
 
   // 详情
@@ -169,49 +140,23 @@ const TableList = (props) => {
     setStatus('view')
     setDetail(record)
 
-    modalRef.current.setTitle('任务详情')
+    modalRef.current.setTitle('调度日志详情')
     modalRef.current.setVisible(true)
-  }
-
-  // 不通过刷新列表请求修改列表状态
-  const onChangeStatus = (checked, record) => {
-    confirm({
-      title: `确认要 "${checked ? '启用' : '停用'}" ${record.jobName}任务吗？`,
-      icon: <ExclamationCircleOutlined />,
-      // content: 'Some descriptions',
-      onOk: async () => {
-        const res = await openOrClose({ jobId: record.jobId, status: checked ? '0' : '1' })
-        if (res.code === 200) {
-          const tableData = tableRef.current.getDataSource()
-          for (let i = 0; i < tableData.length; i++) {
-            if (tableData[i].jobId === record.jobId) {
-              tableData[i].status = checked ? '0' : '1'
-              break;
-            }
-          }
-          tableRef.current.setDataSource(tableData)
-          SageMessage.success(checked ? '启用成功' : '暂停成功')
-        }
-      },
-      onCancel: () => {
-
-      },
-    });
   }
 
   // 表格
   const columns = [
     {
-      title: '任务编号',
-      dataIndex: 'jobId',
-      key: 'jobId',
-      // width: 200,
+      title: '日志编号',
+      dataIndex: 'jobLogId',
+      key: 'jobLogId',
+      // width: 120,
       // ellipsis: true,
     },
     {
       title: '任务名称',
       dataIndex: 'jobName',
-      key: 'jobName',
+      key: 'jobName'
     },
     {
       title: '任务组名',
@@ -226,15 +171,22 @@ const TableList = (props) => {
       ellipsis: true,
     },
     {
-      title: 'cron执行表达式',
-      dataIndex: 'cronExpression',
-      key: 'cronExpression',
+      title: '日志信息',
+      dataIndex: 'jobMessage',
+      key: 'jobMessage',
+      ellipsis: true,
     },
     {
-      title: '状态',
+      title: '执行状态',
       dataIndex: 'status',
       key: 'status',
-      render: (text, record) => <Switch checkedChildren="启用" unCheckedChildren="暂停" checked={text === '0'} onChange={(checked) => onChangeStatus(checked, record)} />
+      render: text => selectDictLabel(jobStatusOptions, text)
+    },
+    {
+      title: '执行时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      width: 200
     },
     {
       title: '操作',
@@ -244,8 +196,7 @@ const TableList = (props) => {
       render: (button, record) => {
 
         const actionList = [
-          { title: '执行一次', method: (e) => handleRun(e, record), isConfirm: true, confirmInfo: `确认要立即执行一次"${record.jobName}"任务吗?` },
-          { title: '详情', method: (e) => handleView(e, record) }
+          { title: '详细', auth: 'monitor:job:query', method: (e) => handleView(e, record) }
         ]
 
         return <ActionSet actionList={actionList} record={record} />
@@ -255,7 +206,7 @@ const TableList = (props) => {
   ]
 
   const tableProps = {
-    rowKey: 'jobId',
+    rowKey: 'jobLogId',
     hasCheck: true,
     columns,
     // 选中checkbox返回
@@ -267,34 +218,25 @@ const TableList = (props) => {
 
   // 新建
   const onAdd = () => {
-    if (modalRef.current) {
-      setStatus('add')
-      modalRef.current.setTitle('新增公告')
-      modalRef.current.setVisible(true)
-      if (createFormRef.current) {
-        createFormRef.current.resetFields()
-      }
-    }
+
   }
 
   // 编辑
   const onEdit = (e) => {
-    const rowRecords = tableRef.current.getSelectedRows()
-    handleEdit(e, rowRecords[0])
+
   }
 
   // 删除
   const onDelete = (e) => {
     e.stopPropagation()
 
-    const jobIds = tableRef.current.getSelectedRowKeys()
+    const jobLogIds = tableRef.current.getSelectedRowKeys()
     confirm({
-      title: `是否确认删除定时任务编号为"${jobIds.join(',')}"的数据项?`,
+      title: `是否确认删除调度日志编号为"${jobLogIds.join(',')}"的数据项?`,
       icon: <ExclamationCircleOutlined />,
-      // content: 'Some descriptions',
       onOk: async () => {
 
-        const res = await removeJob({ jobId: jobIds.join(',') })
+        const res = await removeJobLog({ jobLogId: jobLogIds.join(',') })
         if (res.code === 200) {
           SageMessage.success('删除成功')
           tableRef.current.reloadTable()
@@ -313,10 +255,10 @@ const TableList = (props) => {
     confirm({
       title: '警告',
       icon: <ExclamationCircleOutlined />,
-      content: '是否确认导出所有定时任务数据项?',
+      content: '是否确认导出所有调度日志数据项?',
       onOk: async () => {
         const exportParams = tableRef.current.getSearchParamsValue()
-        const res = await exportJob(exportParams)
+        const res = await exportJobLog(addDateRange(exportParams, 'createTime'))
         if (res.code === 200) {
           download(res.msg)
         }
@@ -327,18 +269,25 @@ const TableList = (props) => {
     });
   }
 
-  // 日志
-  const onJobLog = (event) => {
-    event.stopPropagation()
+  // 清理缓存
+  const onClear = async () => {
+    confirm({
+      title: '警告',
+      icon: <ExclamationCircleOutlined />,
+      content: '是否确认清空所有操作日志数据项?',
+      onOk: async () => {
+        const res = await clean()
+        if (res.code === 200) {
+          SageMessage.success('清空成功')
+          tableRef.current.reloadTable()
+          setSingle(true)
+          setMultiple(true)
+        }
+      },
+      onCancel: () => {
 
-    // 跳转tab
-    props.dispatch({
-      type: 'global/goTab',
-      payload: {
-        path: '/job/log',
-        name: '操作日志'
-      }
-    })
+      },
+    });
   }
 
   // 表格按钮操作
@@ -346,11 +295,9 @@ const TableList = (props) => {
     toolBarRender: () => {
       return (
         <>
-          <AuthButton auth="monitor:job:add" type="primary" icon={<PlusOutlined />} onClick={onAdd}>新增</AuthButton>
-          <AuthButton auth="monitor:job:edit" type="success" icon={<EditOutlined />} onClick={(e) => onEdit(e)} disabled={single} style={{ marginLeft: '8px' }}>编辑</AuthButton>
           <AuthButton auth="monitor:job:remove" type="danger" icon={<DeleteOutlined />} onClick={(e) => onDelete(e)} disabled={multiple} style={{ marginLeft: '8px' }}>删除</AuthButton>
+          <AuthButton auth="monitor:job:remove" type="danger" icon={<SyncOutlined />} onClick={(e) => onClear(e)} style={{ marginLeft: '8px' }}>清空</AuthButton>
           <AuthButton auth="monitor:job:export" type="warning" icon={<VerticalAlignBottomOutlined />} onClick={(e) => onExport(e)} style={{ marginLeft: '8px' }}>导出</AuthButton>
-          <AuthButton auth="monitor:job:query" icon={<ExceptionOutlined />} onClick={(e) => onJobLog(e)} style={{ marginLeft: '8px' }}>日志</AuthButton>
         </>
       )
     },
@@ -365,39 +312,14 @@ const TableList = (props) => {
     if (status === 'update' && updateFormRef.current) {
       updateFormRef.current.submit();
     }
+    if (status === 'view') {
+      modalRef.current.setVisible(false)
+    }
   }
 
   // 表单提交成功
   const onFinish = async (values) => {
-    const formData = Object.assign({}, values)
-    // 处理赋值表单数据
-    // TODO
 
-    let res = null
-    setModalLoading(true)
-    switch (status) {
-      case 'add':
-        res = await addJob(formData)
-        break;
-      case 'update':
-        formData.jobId = detail.jobId
-        res = await updateJob(formData)
-        break
-      default:
-        break;
-    }
-    setModalLoading(false)
-
-    if (res.code === 200) {
-      SageMessage.success('保存成功')
-      modalRef.current.setVisible(false)
-      tableRef.current.reloadTable()
-    }
-  }
-
-  const footer = {}
-  if (status === 'view') {
-    footer.footer = null
   }
 
   return (
@@ -408,7 +330,7 @@ const TableList = (props) => {
         {...tableSearchFormProps}
         {...tableToolProps}
         {...tableProps}
-        request={(params) => queryJob(params)}
+        request={(params) => queryJobLog(params)}
       />
 
       <SageModal
@@ -416,34 +338,14 @@ const TableList = (props) => {
         width={600}
         onOk={onOk}
         confirmLoading={modalLoading}
-        {...footer}
-      // destroyOnClose
+        footer={null}
       >
-        {
-          status === 'add' ?
-            <CreateForm
-              ref={createFormRef}
-              onFinish={onFinish}
-              jobStatusOptions={jobStatusOptions}
-              jobGroupOptions={jobGroupOptions}
-            /> : null
-        }
-        {
-          status === 'update' ?
-            <UpdateForm
-              ref={updateFormRef}
-              detail={detail}
-              onFinish={onFinish}
-              jobStatusOptions={jobStatusOptions}
-              jobGroupOptions={jobGroupOptions}
-            /> : null
-        }
         {
           status === 'view' ? 
             <ViewForm 
               detail={detail} 
               jobStatusOptions={jobStatusOptions} 
-              jobGroupOptions={jobGroupOptions} 
+              jobGroupOptions={jobGroupOptions}
             /> : null
         }
       </SageModal>
@@ -452,6 +354,4 @@ const TableList = (props) => {
   )
 }
 
-export default connect(({ global }) => ({
-  global
-}))(TableList)
+export default TableList

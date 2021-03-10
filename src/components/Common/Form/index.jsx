@@ -67,6 +67,7 @@ const FormComponentType = {
   'switch': Switch,
   'slider': Slider,
   'radio': Radio,
+  'radiobutton': Radio.Button,
   'checkbox': Checkbox,
   'rate': Rate,
   'treeselect': TreeSelect,
@@ -184,7 +185,7 @@ const SageForm = (props, ref) => {
         break;
       case 'radio':
         formCompnentNode = (
-          <FormComponent.Group {...item.props}>
+          <Radio.Group {...item.props}>
             {
               item.options.map((item2, index2) => {
                 return (
@@ -192,7 +193,20 @@ const SageForm = (props, ref) => {
                 )
               })
             }
-          </FormComponent.Group>
+          </Radio.Group>
+        )
+        break;
+      case 'radiobutton':
+        formCompnentNode = (
+          <Radio.Group {...item.props}>
+            {
+              item.options.map((item2, index2) => {
+                return (
+                  <FormComponent value={item2[valueName]} key={item2[valueName]}>{item2[textName]}</FormComponent>
+                )
+              })
+            }
+          </Radio.Group>
         )
         break;
       case 'checkbox':
@@ -269,24 +283,24 @@ const SageForm = (props, ref) => {
       </Row>
       {
         showButtonRow ?
-        <Row span={24}>
-          <Col span={24}>
-            <Form.Item {...tailLayout}>
-              {
-                showSubmitButton ?
-                <Button type="primary" htmlType="submit" className="sage-form-buttn">
-                  {submitText}
-                </Button> : null
-              }
-              {
-                showReturnButton ?
-                <Button htmlType="button" onClick={() => onReturn && onReturn()} className="sage-form-buttn">
-                  {returnText}
-                </Button> : null
-              }
-            </Form.Item>
-          </Col>
-        </Row> : null
+          <Row span={24}>
+            <Col span={24}>
+              <Form.Item {...tailLayout}>
+                {
+                  showSubmitButton ?
+                    <Button type="primary" htmlType="submit" className="sage-form-buttn">
+                      {submitText}
+                    </Button> : null
+                }
+                {
+                  showReturnButton ?
+                    <Button htmlType="button" onClick={() => onReturn && onReturn()} className="sage-form-buttn">
+                      {returnText}
+                    </Button> : null
+                }
+              </Form.Item>
+            </Col>
+          </Row> : null
       }
     </Form>
   )

@@ -47,6 +47,11 @@ export default [
             path: '/dict/type/data/:dictId(\\d+)',
             component: './system/dictdata/index',
           },
+          // 操作日志
+          {
+            path: '/job/log',
+            component: './monitor/job/log/index',
+          },
           // 过渡页
           {
             path: '/transition',

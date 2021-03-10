@@ -1,36 +1,60 @@
 import request from '@/utils/request';
 import { requestPrefix } from '@/services/prefix';
 
-export async function queryNotice(params) {
-  return request(`/${requestPrefix}/system/notice/list`, {
+export async function queryJob(params) {
+  return request(`/${requestPrefix}/monitor/job/list`, {
     method: 'GET',
     params: { ...params },
   });
 }
 
-export async function removeNotice(params) {
-  return request(`/${requestPrefix}/system/notice/${params.noticeId}`, {
+export async function removeJob(params) {
+  return request(`/${requestPrefix}/monitor/job/${params.jobId}`, {
     method: 'DELETE'
   });
 }
-export async function addNotice(params) {
-  return request(`/${requestPrefix}/system/notice`, {
+export async function addJob(params) {
+  return request(`/${requestPrefix}/monitor/job`, {
     method: 'POST',
     data: { ...params },
   });
 }
-export async function updateNotice(params) {
-  return request(`/${requestPrefix}/system/notice`, {
+export async function updateJob(params) {
+  return request(`/${requestPrefix}/monitor/job`, {
     method: 'PUT',
     data: { ...params },
   });
 }
 
 // 查询
-export function getNoticeDetail(params) {
-  return request(`/${requestPrefix}/system/notice/${params.noticeId}`, {
+export function getJobDetail(params) {
+  return request(`/${requestPrefix}/monitor/job/${params.jobId}`, {
     method: 'GET'
   });
+}
+
+export function openOrClose(params) {
+  return request(`/${requestPrefix}/monitor/job/changeStatus`, {
+    method: 'PUT',
+    data: { ...params },
+  });
+}
+
+// 导出
+export async function exportJob(params) {
+  return request(`/${requestPrefix}/monitor/job/export`, {
+    method: 'GET',
+    params: {...params}
+  })
+}
+
+
+// 执行
+export async function runJob(params) {
+  return request(`/${requestPrefix}/monitor/job/run`, {
+    method: 'PUT',
+    data: {...params}
+  })
 }
 
 
