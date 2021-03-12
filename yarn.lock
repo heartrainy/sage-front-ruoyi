@@ -6538,12 +6538,12 @@ ecc-jsbn@~0.1.1:
     safer-buffer "^2.1.0"
 
 echarts@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.npmjs.org/echarts/-/echarts-5.0.1.tgz#b999ff6f515b1aa851ed09576eaf89686b57ce97"
-  integrity sha512-JYn22Dolt2esY2jEzUsw1OxbobuW67oGjIoTjZO3rW89SWkfJ4kbrmC2OW9JjsBrD1rdkmaWBuZZ2HgmThyxJw==
+  version "5.0.2"
+  resolved "https://registry.npmjs.org/echarts/-/echarts-5.0.2.tgz#1726d17a57cf05d62cd0567b4325e1201a56baf6"
+  integrity sha512-En0VYpc96nw2/2AZoBWPHsGi471zMublttj50kfFpYAeR4geup0Tj9iVgEXh7QYZFPnRiruDJEjcB5PXZ+BYzQ==
   dependencies:
     tslib "2.0.3"
-    zrender "5.0.3"
+    zrender "5.0.4"
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -15172,10 +15172,10 @@ safe-regex@^2.1.1:
   resolved "https://registry.npm.taobao.org/safer-buffer/download/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha1-RPoWGwGHuVSd2Eu5GAL5vYOFzWo=
 
-sage-chart@^1.0.2:
-  version "1.0.5"
-  resolved "https://registry.npmjs.org/sage-chart/-/sage-chart-1.0.5.tgz#1c50f40fa10b3bae9b342bb85767916a4bccfd71"
-  integrity sha512-G34HsgxM+QCS7s2FiLFOqO3X1cAiBqBjcpuGkkWPLsi3wvRIB+rxDj9pwz0VYYj4GkQAnxbF3Dd2+Z5Cbjky2Q==
+sage-chart@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.npmjs.org/sage-chart/-/sage-chart-1.0.7.tgz#1405b791a6827f9fbb218d2ea5e6c24dab2c46ac"
+  integrity sha512-uq2KgH5HvmVuTncJ0iQJwQVfdI0GN1wBNofWu1L7JvPCDZeyG8kk0KsPjp9XoyKBBsq2N8ygfjSBCnHFpkSU3A==
   dependencies:
     echarts "^5.0.1"
     react "^16.8.6"
@@ -17957,10 +17957,10 @@ zlib@1.0.5:
   resolved "https://registry.npm.taobao.org/zlib/download/zlib-1.0.5.tgz#6e7c972fc371c645a6afb03ab14769def114fcc0"
   integrity sha1-bnyXL8NxxkWmr7A6sUdp3vEU/MA=
 
-zrender@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.npmjs.org/zrender/-/zrender-5.0.3.tgz#5e04a55d36455067e4536c8ce9c25093f50f6b68"
-  integrity sha512-TVcN2IMdo7je3GEq/E4CER4AGBe/n50/izILdupppyHf/hVHuiXCRliqdu8+32Z1OmGg6RfKt5qQlkX+bOtU0g==
+zrender@5.0.4:
+  version "5.0.4"
+  resolved "https://registry.npmjs.org/zrender/-/zrender-5.0.4.tgz#89c355af908b9f64a301b38f751b7951f2c8a95a"
+  integrity sha512-DJpy0yrHYY5CuH6vhb9IINWbjvBUe/56J8aH86Jb7O8rRPAYZ3M2E469Qf5B3EOIfM3o3aUrO5edRQfLJ+l1Qw==
   dependencies:
     tslib "2.0.3"
 
