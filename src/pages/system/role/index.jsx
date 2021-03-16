@@ -179,11 +179,12 @@ const TableList = () => {
         })
       }
       getCheckedKey(menus)
+      console.log(lastCheckedKeys)
 
-      menutreeRef.current.setCheckedKeys(lastCheckedKeys)
+      menutreeRef.current.setCheckedKeys(checkedKeys)
       setRole({
         ...record,
-        menuIds: lastCheckedKeys.slice()
+        menuIds: checkedKeys.slice()
       })
     }
   }

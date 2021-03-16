@@ -7,6 +7,13 @@ const routes = [
   '/system/dict',
   '/system/config',
   '/system/notice',
+  '/system/log/operlog',
+  '/system/log/logininfor',
+  '/monitor/online',
+  '/monitor/job',
+  '/monitor/druid',
+  '/monitor/server',
+  '/monitor/cache'
 ]
 
 export default {

@@ -147,16 +147,20 @@ const BasicLayout = (props) => {
   // 选中菜单
   const handleSelectMenu = ({ item, key }) => {
 
-    // 判断tabbar
-    props.dispatch({
-      type: 'global/checkPaneExist',
-      payload: {
-        path: key
-      }
-    })
+    if (key.includes('http')) {
+      window.open(key)
+    } else {
+      // 判断tabbar
+      props.dispatch({
+        type: 'global/checkPaneExist',
+        payload: {
+          path: key
+        }
+      })
 
-    // 页面跳转
-    history.push(key)
+      // 页面跳转
+      history.push(key)
+    }
   }
 
   const handleOpenChange = (_openKeys) => {
@@ -168,7 +172,7 @@ const BasicLayout = (props) => {
       } else {
         newMenuOpenKeys = [_openKeys.slice().pop()]
       }
-    } 
+    }
     // 收起
     else {
       // 如果收起子菜单

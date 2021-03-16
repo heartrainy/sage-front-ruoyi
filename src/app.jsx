@@ -48,14 +48,19 @@ export function patchRoutes({ routes }) {
       // 添加权限路由
       componentPathList = []
       filterComponentList(authRoutes)
+      console.log(componentPathList)
       componentPathList.forEach((item, index) => {
-        const component = {
-          path: item.path,
-          exact: true,
-          component: require(`@/pages/${item.component}.jsx`).default,
-        }
+        
+        if (!item.path.includes('http')) {
+          const component = {
+            path: item.path,
+            exact: true,
+            component: require(`@/pages/${item.component}.jsx`).default,
+          }
 
-        routes[i].routes[0].routes.splice(2 + index, 0, component)
+          routes[i].routes[0].routes.splice(2 + index, 0, component)
+        }
+        
       })
 
       // 添加不匹配路由跳转404页面
