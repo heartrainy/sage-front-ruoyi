@@ -13,7 +13,8 @@ const routes = [
   '/monitor/job',
   '/monitor/druid',
   '/monitor/server',
-  '/monitor/cache'
+  '/monitor/cache',
+  '/profile'
 ]
 
 export default {

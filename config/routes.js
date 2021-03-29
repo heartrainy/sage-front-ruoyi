@@ -57,6 +57,11 @@ export default [
             path: '/transition',
             component: './Transition'
           },
+          // 个人中心
+          {
+            path: '/profile',
+            component: './user/center',
+          },
           // 图表
           {
             path: '/charts',

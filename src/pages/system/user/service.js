@@ -32,6 +32,13 @@ export function getUserDetail(params) {
   });
 }
 
+// 查询用户个人信息
+export function getUserProfile() {
+  return request(`/${requestPrefix}/system/user/profile`, {
+    method: 'GET'
+  });
+}
+
 export function openOrClose(params) {
   return request(`/${requestPrefix}/system/user/changeStatus`, {
     method: 'PUT',
@@ -40,9 +47,9 @@ export function openOrClose(params) {
 }
 
 export function resetPwd(params) {
-  return request(`/${requestPrefix}/system/user/resetPwd`, {
+  return request(`/${requestPrefix}/system/user/profile/updatePwd`, {
     method: 'PUT',
-    data: { ...params },
+    params: { ...params },
   });
 }
 
@@ -74,5 +81,13 @@ export async function importUser(params) {
 export async function uploadTemplate() {
   return request(`/${requestPrefix}/system/user/importTemplate`, {
     method: 'GET'
+  })
+}
+
+// 上传头像
+export async function uploadAvatar(params) {
+  return request(`/${requestPrefix}/system/user/profile/avatar`, {
+    method: 'POST',
+    data: params.file,
   })
 }

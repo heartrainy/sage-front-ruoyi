@@ -238,8 +238,15 @@ const BasicLayout = (props) => {
 
   // 跳转到个人中心
   const goCenter = () => {
-    checkMenuOpen('/system/center')
-    handleSelectMenu({ key: '/system/center' })
+    props.dispatch({
+      type: 'global/goTab',
+      payload: {
+        path: '/profile',
+        name: '个人中心'
+      }
+    })
+    // checkMenuOpen('/system/center')
+    // handleSelectMenu({ key: '/system/center' })
   }
 
   return (

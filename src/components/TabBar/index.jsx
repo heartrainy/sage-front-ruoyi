@@ -102,7 +102,7 @@ const TabBar = (props) => {
       lastActiveKey = lastPanes[lastPanes.length - 1].path;
     }
     // setTimeout(() => {
-    const newMenuOpenKeys = getMenuOpen(activekey)
+    const newMenuOpenKeys = getMenuOpen(lastActiveKey)
 
     props.dispatch({
       type: 'global/updateState',

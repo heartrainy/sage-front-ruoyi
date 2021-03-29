@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Card, Tabs } from 'antd'
+import { Card, Tabs, Upload } from 'antd'
 import { connect } from 'umi'
+import ImgCrop from 'antd-img-crop';
 import { SageLayoutLR, SageForm, SageMessage } from '@/components/Common'
 import { mobile, email } from '@/utils/verify'
-import { updateUser, resetPwd } from '@/pages/system/user/service'
+import { updateUser, resetPwd, getUserProfile, uploadAvatar } from '@/pages/system/user/service'
+import { requestPrefix } from '@/services/prefix'
+import defaultAvator from '@/assets/profile.jpg'
 
 import style from './style.less'
 
@@ -12,38 +15,52 @@ const { TabPane } = Tabs;
 
 const Center = (props) => {
 
+  const {dispatch} = props
+
   const [userDetail, setUserDetail] = useState({})
 
   const formRef = useRef()
   const formRef2 = useRef()
-  // const requestCenterInfo = async () => {
-  //   const res = await getUserDetail({id: props.user.currentUser.userId})
-  //   if (res.code === 200) {
-  //     setUserDetail(res.data)
-  //   }
-  // }
+
+  const requestCenterInfo = async () => {
+    const res = await getUserProfile()
+    if (res.code === 200) {
+      const obj = Object.assign({}, res.data)
+      obj.roleGroup = res.roleGroup
+      obj.postGroup = res.postGroup
+      setUserDetail(obj)
+
+      // 基本资料赋值
+      formRef.current.setFieldsValue({
+        nickName: obj.nickName,
+        phonenumber: obj.phonenumber,
+        email: obj.email,
+        sex: obj.sex,
+      })
+    }
+  }
 
   // 表单字段设置
   const formFields = [
     {
-      name: 'personName',
-      label: '用户名',
+      name: 'nickName',
+      label: '用户昵称',
       type: 'input',
       rules: [{ required: true }],
       props: {
-        style: {width: '300px'}
+        style: { width: '300px' }
       }
     },
     {
-      name: 'mobile',
-      label: '手机号',
+      name: 'phonenumber',
+      label: '手机号码',
       type: 'input',
       rules: [
         { required: true },
-        { pattern: mobile, message: '请输入正确的手机号' }
+        { pattern: mobile, message: '请输入正确的手机号码' }
       ],
       props: {
-        style: {width: '300px'}
+        style: { width: '300px' }
       }
     },
     {
@@ -51,21 +68,21 @@ const Center = (props) => {
       label: '邮箱',
       type: 'input',
       rules: [
-        // { required: true },
+        { required: true },
         { pattern: email, message: '请输入正确的邮箱' }
       ],
       props: {
-        style: {width: '300px'}
+        style: { width: '300px' }
       }
     },
     {
       name: 'sex',
       label: '性别',
       type: 'radio',
-      initialValue: '1',
+      initialValue: '0',
       options: [
-        { value: '1', text: '男' },
-        { value: '0', text: '女' },
+        { value: '1', text: '女' },
+        { value: '0', text: '男' },
       ]
     }
   ]
@@ -93,7 +110,7 @@ const Center = (props) => {
   // 表单字段设置
   const formFields2 = [
     {
-      name: 'oldPwd',
+      name: 'oldPassword',
       label: '旧密码',
       type: 'input',
       rules: [
@@ -101,11 +118,11 @@ const Center = (props) => {
       ],
       props: {
         type: 'password',
-        style: {width: '300px'}
+        style: { width: '300px' }
       }
     },
     {
-      name: 'newPwd',
+      name: 'newPassword',
       label: '新密码',
       type: 'input',
       rules: [
@@ -113,11 +130,11 @@ const Center = (props) => {
       ],
       props: {
         type: 'password',
-        style: {width: '300px'}
+        style: { width: '300px' }
       }
     },
     {
-      name: 'confirmPwd',
+      name: 'confirmPassword',
       label: '确认密码',
       dependencies: ['newPwd'],
       type: 'input',
@@ -125,7 +142,7 @@ const Center = (props) => {
         { required: true, message: '请确认新密码' },
         ({ getFieldValue }) => ({
           validator(rule, value) {
-            if (!value || getFieldValue('newPwd') === value) {
+            if (!value || getFieldValue('newPassword') === value) {
               return Promise.resolve();
             }
             return Promise.reject('新密码不一致!');
@@ -134,7 +151,7 @@ const Center = (props) => {
       ],
       props: {
         type: 'password',
-        style: {width: '300px'}
+        style: { width: '300px' }
       }
     }
   ]
@@ -160,15 +177,52 @@ const Center = (props) => {
   }
 
   useEffect(() => {
-    const data = props.user.currentUser.user
-    setUserDetail(data)
-    formRef.current.setFieldsValue({
-      personName: data.personName,
-      mobile: data.mobile,
-      email: data.email,
-      sex: data.sex,
-    })
+    // const data = props.user.currentUser
+    // console.log(data)
+    // setUserDetail(data)
+    // formRef.current.setFieldsValue({
+    //   // personName: data.personName,
+    //   // mobile: data.mobile,
+    //   // email: data.email,
+    //   // sex: data.sex,
+    // })
+    requestCenterInfo()
   }, [])
+
+
+  const onChange = async ({ file: newFile }) => {
+    if (newFile.status === 'done') {
+      const formData = new FormData();
+      formData.append('avatarfile', newFile.originFileObj);
+
+      const res = await uploadAvatar({
+        file: formData
+      })
+
+      if (res.code === 200) {
+        SageMessage.success('修改成功')
+        requestCenterInfo()
+        dispatch({
+          type: 'user/fetchCurrent',
+        });
+      }
+    }
+  };
+
+  const onPreview = async file => {
+    let src = file.url;
+    if (!src) {
+      src = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj);
+        reader.onload = () => resolve(reader.result);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow.document.write(image.outerHTML);
+  };
 
   return (
     <PageHeaderWrapper>
@@ -179,28 +233,45 @@ const Center = (props) => {
           <Card title="个人信息" size="small" style={{ height: '100%' }}>
             <div>
               <div className={style["center-avator"]}>
-                <img src={`/ebd/sys/file/showImage?imageId=${userDetail.headImage}`} width="120" height="120" />
+                <ImgCrop rotate>
+                  <Upload
+                    action={`/${requestPrefix}/system/user/profile/avatar`} // 无效地址(只是为了不再请求当前页设置的地址)
+                    listType="picture-card"
+                    className="avatar-uploader"
+                    name="avatarfile"
+                    showUploadList={false}
+                    onChange={onChange}
+                    onPreview={onPreview}
+                  >
+                    <img src={userDetail.avatar ? `/${requestPrefix}${userDetail.avatar}` : defaultAvator} width="120" height="120" />
+                  </Upload>
+                </ImgCrop>
+                {/* <img src={userDetail.avatar ? userDetail.avatar : defaultAvator} width="120" height="120" /> */}
               </div>
               <div className={style["user-info"]}>
                 <div className={style["user-info-item"]}>
-                  <div className={style["user-info-item-left"]}>登录名</div>
-                  <div className={style["user-info-item-right"]}>{userDetail.mobile}</div>
+                  <div className={style["user-info-item-left"]}>用户名称</div>
+                  <div className={style["user-info-item-right"]}>{userDetail.userName}</div>
                 </div>
                 <div className={style["user-info-item"]}>
-                  <div className={style["user-info-item-left"]}>用户名</div>
-                  <div className={style["user-info-item-right"]}>{userDetail.personName}</div>
-                </div>
-                <div className={style["user-info-item"]}>
-                  <div className={style["user-info-item-left"]}>所属部门</div>
-                  <div className={style["user-info-item-right"]}>{userDetail.orgnName}</div>
+                  <div className={style["user-info-item-left"]}>手机号码</div>
+                  <div className={style["user-info-item-right"]}>{userDetail.phonenumber}</div>
                 </div>
                 <div className={style["user-info-item"]}>
                   <div className={style["user-info-item-left"]}>用户邮箱</div>
                   <div className={style["user-info-item-right"]}>{userDetail.email}</div>
                 </div>
                 <div className={style["user-info-item"]}>
+                  <div className={style["user-info-item-left"]}>所属部门</div>
+                  <div className={style["user-info-item-right"]}>{userDetail.dept ? `${userDetail.dept.deptName} / ${userDetail.postGroup}` : ''}</div>
+                </div>
+                <div className={style["user-info-item"]}>
+                  <div className={style["user-info-item-left"]}>所属角色</div>
+                  <div className={style["user-info-item-right"]}>{userDetail.roleGroup}</div>
+                </div>
+                <div className={style["user-info-item"]}>
                   <div className={style["user-info-item-left"]}>入职时间</div>
-                  <div className={style["user-info-item-right"]}>{userDetail.entryTime}</div>
+                  <div className={style["user-info-item-right"]}>{userDetail.createTime}</div>
                 </div>
               </div>
             </div>
@@ -213,8 +284,8 @@ const Center = (props) => {
                 <TabPane tab="基本资料" key="1">
                   <SageForm
                     ref={formRef}
-                    labelCol={ {span: 3 }}
-                    wrapperCol={ {span: 21} }
+                    labelCol={{ span: 3 }}
+                    wrapperCol={{ span: 21 }}
                     formFields={formFields}
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
@@ -228,8 +299,8 @@ const Center = (props) => {
                 <TabPane tab="修改密码" key="2">
                   <SageForm
                     ref={formRef2}
-                    labelCol={ {span: 3 }}
-                    wrapperCol={ {span: 21} }
+                    labelCol={{ span: 3 }}
+                    wrapperCol={{ span: 21 }}
                     formFields={formFields2}
                     onFinish={onFinish2}
                     onFinishFailed={onFinishFailed2}

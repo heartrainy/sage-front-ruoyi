@@ -1,4 +1,5 @@
 import { queryCurrent, query as queryUsers, getRouters } from '@/services/user';
+import { requestPrefix } from '@/services/prefix'
 import { deepClone } from '@/utils/utils';
 
 // 处理原路由数据中的path字段
@@ -37,7 +38,7 @@ const UserModel = {
         const userInfo = response.user
 
         userInfo.name = userInfo.userName || '创世者'
-        userInfo.avatar = userInfo.avatar ? `/ebd/sys/file/showImage?imageId=${userInfo.user.headImage}` : 'http://static.titian365.com/person_logo.png'
+        userInfo.avatar = userInfo.avatar ? `/${requestPrefix}${userInfo.avatar}` : 'http://static.titian365.com/person_logo.png'
 
         yield put({
           type: 'saveCurrentUser',

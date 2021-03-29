@@ -1274,6 +1274,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.13.4":
+  version "7.13.10"
+  resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.13.10.tgz#47d42a57b6095f4468da440388fdbad8bebf0d7d"
+  integrity sha512-4QPkjJq6Ns3V/RgpEahRk+AGfL0eO6RHHtTWoNNr5mO49G6B5+X6d6THgWEAvTrznU5xYpbAlVKRYcsCgh/Akw==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/template@^7.10.4", "@babel/template@^7.12.7", "@babel/template@^7.3.3", "@babel/template@^7.4.0":
   version "7.12.7"
   resolved "https://registry.npm.taobao.org/@babel/template/download/@babel/template-7.12.7.tgz#c817233696018e39fbb6c491d2fb684e05ed43bc"
@@ -3716,6 +3723,14 @@ ansicolors@~0.3.2:
   version "0.3.2"
   resolved "https://registry.npm.taobao.org/ansicolors/download/ansicolors-0.3.2.tgz#665597de86a9ffe3aa9bfbe6cae5c6ea426b4979"
   integrity sha1-ZlWX3oap/+Oqm/vmyuXG6kJrSXk=
+
+antd-img-crop@^3.14.1:
+  version "3.14.1"
+  resolved "https://registry.npmjs.org/antd-img-crop/-/antd-img-crop-3.14.1.tgz#4e824425defea29fb1913b2460e5c2382a247c68"
+  integrity sha512-m9znzbghh+e9K4//CaNGYfuSM/aUGsX+sByCc/Qo8jDmQSWpg05onNvbOHFVtxht1DfyGypgyEQ11JDikS7ERg==
+  dependencies:
+    "@babel/runtime" "^7.13.4"
+    react-easy-crop "^3.3.1"
 
 antd-mobile@^2.3.1:
   version "2.3.4"
@@ -11664,6 +11679,11 @@ normalize-url@^4.1.0:
   resolved "https://registry.npm.taobao.org/normalize-url/download/normalize-url-4.5.0.tgz?cache=0&sync_timestamp=1602432435724&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fnormalize-url%2Fdownload%2Fnormalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
   integrity sha1-RTNUCH5sqWlXvY9br3U/WYIUISk=
 
+normalize-wheel@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/normalize-wheel/-/normalize-wheel-1.0.1.tgz#aec886affdb045070d856447df62ecf86146ec45"
+  integrity sha1-rsiGr/2wRQcNhWRH32Ls+GFG7EU=
+
 normalize.css@^7.0.0:
   version "7.0.0"
   resolved "https://registry.npm.taobao.org/normalize.css/download/normalize.css-7.0.0.tgz#abfb1dd82470674e0322b53ceb1aaf412938e4bf"
@@ -14168,6 +14188,14 @@ react-dom@^16.13.1, react-dom@^16.8.6:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.19.1"
+
+react-easy-crop@^3.3.1:
+  version "3.3.2"
+  resolved "https://registry.npmjs.org/react-easy-crop/-/react-easy-crop-3.3.2.tgz#5952cb332fff8c159f7f953bc7468d71e31eb52b"
+  integrity sha512-u5QsCq0uxf1Cct3IOWtJek1FklteFlOPyO5fjdlu5pG44C8/3Dhizh23UDtCGTe/9T12udbyrss+jyG46WcZIQ==
+  dependencies:
+    normalize-wheel "^1.0.1"
+    tslib "2.0.1"
 
 react-error-overlay@6.0.8:
   version "6.0.8"
@@ -16849,6 +16877,11 @@ tsconfig-paths@^3.9.0:
     json5 "^1.0.1"
     minimist "^1.2.0"
     strip-bom "^3.0.0"
+
+tslib@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-2.0.1.tgz#410eb0d113e5b6356490eec749603725b021b43e"
+  integrity sha512-SgIkNheinmEBgx1IUNirK0TUD4X9yjjBRTqqjggWCU3pUEqIk3/Uwl3yRixYKT6WjQuGiwDv4NomL3wqRCj+CQ==
 
 tslib@2.0.3:
   version "2.0.3"
