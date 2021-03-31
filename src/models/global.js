@@ -157,16 +157,18 @@ const GlobalModel = {
     *returnTab({ payload }, { put, select }) {
       const globalState = yield select(state => state.global)
 
-      // dropByCacheKey(payload.closePath)
+      dropByCacheKey(payload.closePath)
 
       const tabPanes = globalState.tabPanes.slice()
       let removeIndex;
       tabPanes.forEach((pane, i) => {
-        if (pane.key === payload.closePath) {
+        if (pane.path === payload.closePath) {
           removeIndex = i;
         }
       });
-      tabPanes.splice(removeIndex, 1)
+      if (removeIndex) {
+        tabPanes.splice(removeIndex, 1)
+      }
 
       const newState = {}
       newState.menuSelectedKeys = [payload.returnPath]
@@ -174,7 +176,7 @@ const GlobalModel = {
 
       let isExist = false;
       for (let i = 0; i < tabPanes.length; i++) {
-        if (tabPanes[i].key === payload.returnPath) {
+        if (tabPanes[i].path === payload.returnPath) {
           isExist = true;
           break;
         }
@@ -182,9 +184,11 @@ const GlobalModel = {
       if (!isExist) {
         const newPanes = tabPanes.slice();
         newPanes.push({
-          // title: REACT_APP_ENV === 'dev' ? formatMessage({id: p.menuName}) : p.menuName,
-          title: payload.returnName,
-          key: payload.returnPath,
+          hidden: false,
+          meta: {
+            title: payload.returnName
+          },
+          path: payload.returnPath
         });
         newState.tabPanes = newPanes
       } else {

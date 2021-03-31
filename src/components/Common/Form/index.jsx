@@ -118,7 +118,8 @@ const SageForm = (props, ref) => {
     getFieldValue: (name) => form.getFieldValue(name),
     getFieldsValue: (nameList) => form.getFieldsValue(nameList),
     setFieldsValue: (values) => form.setFieldsValue(values),
-    resetFields: (fields) => form.resetFields(fields)
+    resetFields: (fields) => form.resetFields(fields),
+    scrollToField: (name, options) => form.scrollToField(name, options)
   }))
 
   let formNode = null
