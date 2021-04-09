@@ -5,6 +5,10 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { useLocation, useIntl, history, dropByCacheKey, connect } from 'umi';
 import './style.less';
 
+const dynamicRoutes = [
+  '/dict/type/data/:dictId'
+]
+
 const { TabPane } = Tabs;
 
 const TabBar = (props) => {
@@ -67,7 +71,13 @@ const TabBar = (props) => {
 
       // props.checkMenuOpen(activekey)
       // 如果是动态路由跳转过渡页
-      const match = pathToRegexp('/dict/type/data/:dictId').exec(activekey);
+      let match = null
+      for (let i = 0; i < dynamicRoutes.length; i++) {
+        match = pathToRegexp(dynamicRoutes[i]).exec(activekey);
+        if (match) {
+          break
+        }
+      }
       if (match) {
         const path = match[0];
         history.push({
@@ -116,7 +126,13 @@ const TabBar = (props) => {
 
     // props.checkMenuOpen(lastActiveKey)
     // 如果是动态路由跳转过渡页
-    const match = pathToRegexp('/dict/type/data/:dictId').exec(lastActiveKey);
+    let match = null
+    for (let i = 0; i < dynamicRoutes.length; i++) {
+      match = pathToRegexp(dynamicRoutes[i]).exec(lastActiveKey);
+      if (match) {
+        break
+      }
+    }
     if (match) {
       const path = match[0];
       history.push({

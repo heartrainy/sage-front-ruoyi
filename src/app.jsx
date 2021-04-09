@@ -52,13 +52,15 @@ export function patchRoutes({ routes }) {
       componentPathList.forEach((item, index) => {
         
         if (!item.path.includes('http')) {
-          const component = {
-            path: item.path,
-            exact: true,
-            component: require(`@/pages/${item.component}.jsx`).default,
+          if (item.component !== 'Layout') {
+            const component = {
+              path: item.path,
+              exact: true,
+              component: require(`@/pages/${item.component}.jsx`).default,
+            }
+  
+            routes[i].routes[0].routes.splice(2 + index, 0, component)
           }
-
-          routes[i].routes[0].routes.splice(2 + index, 0, component)
         }
         
       })

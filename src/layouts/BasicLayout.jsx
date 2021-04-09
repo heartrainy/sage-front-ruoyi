@@ -202,29 +202,6 @@ const BasicLayout = (props) => {
     })
   }
 
-  // 判断菜单展开折叠
-  const checkMenuOpen = (key) => {
-    const newMenuOpenKeys = []
-    const loopMenuOpen = (list) => {
-      for (let i = 0; i < list.length; i++) {
-        if (list[i].path === key) {
-          props.dispatch({
-            type: 'global/updateState',
-            payload: {
-              menuOpenKeys: newMenuOpenKeys
-            }
-          })
-          break
-        }
-        if (list[i].children && key.includes(list[i].path)) {
-          newMenuOpenKeys.push(list[i].path)
-          loopMenuOpen(list[i].children)
-        }
-      }
-    }
-    loopMenuOpen(menuTree)
-  }
-
   useEffect(() => {
 
     dispatch({
